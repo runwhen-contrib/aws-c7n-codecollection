@@ -8,7 +8,7 @@
         "-p",
         "3000:3000",
         "--name",
-        "mycodecollection"
+        "rw-c7n-codecollection"
     ],
     "forwardPorts": [
         3000
