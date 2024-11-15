@@ -1,111 +1,33 @@
+from c7n.resources import load_resources
 from c7n.policy import Policy
 from c7n.config import Config
 
-class S3:
-    ROBOT_LIBRARY_SCOPE = "GLOBAL"
+# Ensure only AWS resources are loaded
+load_resources()
 
-    def __init__(self):
-        """
-        Initializes the S3 class. Region and account ID can be passed as arguments
-        to each method for flexibility with Robot Framework.
-        """
-        self.config = None
 
-    def _create_config(self, region, account_id):
-        """
-        Helper method to create a Cloud Custodian config for the given region and account ID.
-        """
-        config = Config.empty()
-        config.region = region
-        config.account_id = account_id
-        self.config = config
+def count_s3_buckets(aws_region, account_id):
+    """
+    Count the number of S3 buckets in the specified AWS account.
 
-    def count_buckets_with_public_access(self, AWS_REGION, AWS_ACCOUNT_ID):
-        """
-        Counts the number of S3 buckets with public access.
+    Args:
+        aws_region (str): The AWS region to use.
+        account_id (str): The AWS account ID.
 
-        Args:
-            AWS_REGION (str): AWS region to target.
-            AWS_ACCOUNT_ID (str): AWS account ID.
+    Returns:
+        int: The number of S3 buckets in the account.
+    """
+    # Set up Cloud Custodian configuration
+    config = Config.empty()
+    config.region = aws_region
+    config.account_id = account_id
 
-        Returns:
-            int: Count of S3 buckets with public access.
-        """
-        self._create_config(AWS_REGION, AWS_ACCOUNT_ID)
-        
-        policy_data = {
-            "name": "s3-count-public-access",
-            "resource": "s3",
-            "filters": [
-                {
-                    "type": "public",
-                    "value": "true"
-                }
-            ]
-        }
-        policy = Policy(policy_data, config=self.config)
-        resources = policy.run()
-        
-        return len(resources)
+    # Define a simple policy to target S3 buckets
+    policy_data = {"name": "count-s3-buckets", "resource": "aws.s3"}
 
-    def list_buckets_with_public_access(self, AWS_REGION, AWS_ACCOUNT_ID):
-        """
-        Lists the names of S3 buckets with public access.
+    # Initialize and run the policy
+    policy = Policy(policy_data, options=config)
+    resources = policy.run()
 
-        Args:
-            AWS_REGION (str): AWS region to target.
-            AWS_ACCOUNT_ID (str): AWS account ID.
-
-        Returns:
-            list: List of S3 bucket names with public access.
-        """
-        self._create_config(AWS_REGION, AWS_ACCOUNT_ID)
-        
-        policy_data = {
-            "name": "s3-list-public-access",
-            "resource": "s3",
-            "filters": [
-                {
-                    "type": "public",
-                    "value": "true"
-                }
-            ]
-        }
-        policy = Policy(policy_data, config=self.config)
-        resources = policy.run()
-        
-        return [resource['Name'] for resource in resources]
-
-    def remove_public_access(self, AWS_REGION, AWS_ACCOUNT_ID):
-        """
-        Removes public access from S3 buckets with public access permissions.
-
-        Args:
-            AWS_REGION (str): AWS region to target.
-            AWS_ACCOUNT_ID (str): AWS account ID.
-
-        Returns:
-            list: List of S3 bucket names that had public access removed.
-        """
-        self._create_config(AWS_REGION, AWS_ACCOUNT_ID)
-        
-        policy_data = {
-            "name": "s3-remove-public-access",
-            "resource": "s3",
-            "filters": [
-                {
-                    "type": "public",
-                    "value": "true"
-                }
-            ],
-            "actions": [
-                {
-                    "type": "delete-global-grants",
-                    "grants": ["READ", "WRITE", "READ_ACP", "WRITE_ACP", "FULL_CONTROL"]
-                }
-            ]
-        }
-        policy = Policy(policy_data, config=self.config)
-        resources = policy.run()
-        
-        return [resource['Name'] for resource in resources]
+    # Return the count of S3 buckets
+    return len(resources)

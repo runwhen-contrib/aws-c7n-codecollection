@@ -1,13 +1,16 @@
 *** Settings ***
-Metadata          Author    My Name
-Documentation     This is a hello world codebundle!
+Metadata          Author   stewartshea
+Metadata          Support    AWS,S3
+Documentation     This is a basic Cloud Custodian AWS SLI
 Force Tags    Message    Hello    World    Test
 Library    RW.Core
 Library    CloudCustodian.AWS
 
+Suite Setup    Suite Initialization
+
 *** Tasks ***
 Count Buckets With Public Access
-    ${count}=    CloudCustodian.AWS.Count Buckets with Public Access
+    ${count}=    CloudCustodian.AWS.Count S3 Buckets
     ...    AWS_REGION=${AWS_REGION}
     ...    AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}  
     RW.Core.Push Metric    ${count}
