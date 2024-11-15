@@ -11,7 +11,7 @@ tasks:
     desc: "Run cleanup tasks"
     cmds:
       - task: check-and-cleanup-terraform
-      - task: clean-rwl-discovery
+      # - task: clean-rwl-discovery
 
   build-infra:
     desc: "Build test infrastructure"
@@ -109,7 +109,7 @@ tasks:
     cmds:
       - |
         # Source Envs for Auth
-        source terraform/tf.local
+        source terraform/tf.secret
 
         # Navigate to the Terraform directory
         if [ ! -d "terraform" ]; then
