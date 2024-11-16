@@ -1,10 +1,9 @@
-from c7n.resources import load_resources
+from c7n.resources.aws import s3
 from c7n.policy import Policy
 from c7n.config import Config
 
-# Ensure only AWS resources are loaded
-load_resources()
-
+# Explicitly load only the `s3` resource
+s3.register_s3()
 
 def count_s3_buckets(aws_region, account_id):
     """

@@ -1,0 +1,19 @@
+policies:
+  - name: s3-public-buckets
+    resource: s3
+    description: |
+      Identify S3 buckets with public access enabled either via bucket policy, ACLs,
+      or other misconfigurations.
+    filters:
+      - or:
+          # Public ACLs
+          - type: global-grants
+            allow: ["READ", "WRITE", "READ_ACP", "WRITE_ACP"]
+          # Public Bucket Policies
+          - type: bucket-policy
+            match: 
+              - "Principal": "*"
+          # Block Public Access disabled
+          - type: check-public-block
+            BlockPublicAcls: false
+            BlockPublicPolicy: false
