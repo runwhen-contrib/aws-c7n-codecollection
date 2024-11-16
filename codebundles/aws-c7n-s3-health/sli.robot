@@ -10,13 +10,12 @@ Suite Setup    Suite Initialization
 
 *** Tasks ***
 Count s3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
-    ${count}=    RW.CLI.Run Cli
-    ...    cmd=custodian run --output-dir ${OUTPUT_DIR}/aws-c7n-s3-health ${CURDIR}/s3-public-buckets.yaml
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-s3-health ${CURDIR}/s3-public-buckets.yaml
     ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-    ...    AWS_REGION=${AWS_REGION}
-    ...    AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}  
-    
+    ${count}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-s3-health/s3-public-buckets/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value' file.json
     RW.Core.Push Metric    ${count}
 
 

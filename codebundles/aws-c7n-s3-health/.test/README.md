@@ -1,5 +1,7 @@
 ## Test
 
+**Note: The Terraform setup uses local terraform state. Ensure to perform a terraform destroy (or `task clean`) before losing your statefile and leaving things running.**  
+
 ### Requirements
 
 #### Building Infrastructure
