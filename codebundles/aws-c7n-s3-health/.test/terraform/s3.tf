@@ -18,15 +18,14 @@ resource "null_resource" "check_bucket_existence" {
 }
 
 resource "aws_s3_bucket" "unique_bucket" {
-  depends_on = [null_resource.check_bucket_existence]
-
-  bucket = "${var.bucket_prefix}-${random_id.bucket_suffix.hex}"
-
+  bucket        = "${var.bucket_prefix}-${random_id.bucket_suffix.hex}"
+  force_destroy = false # Disable Terraform's force_destroy
   tags = {
     Name        = "Public S3 Bucket"
     Environment = "Development"
   }
 }
+
 
 
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
