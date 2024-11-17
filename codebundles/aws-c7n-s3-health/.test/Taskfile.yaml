@@ -124,7 +124,7 @@ tasks:
 
         echo "Starting new container $CONTAINER_NAME..."
 
-        docker run --name $CONTAINER_NAME -e DEBUG_LOGGING=true -p 8081:8081 -v "$(pwd)":/shared -d us-docker.pkg.dev/runwhen-nonprod-shared/public-images/runwhen-local:544-merge-ce614201 || {
+        docker run --name $CONTAINER_NAME -e DEBUG_LOGGING=true -p 8081:8081 -v "$(pwd)":/shared -d us-docker.pkg.dev/runwhen-nonprod-shared/public-images/runwhen-local:544-merge-0ee67692 || {
           echo "Failed to start container"; exit 1;
         }
 
