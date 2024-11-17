@@ -55,10 +55,6 @@ tasks:
           aws: 
             awsAccessKeyId: $AWS_ACCESS_KEY_ID
             awsSecretAccessKey: $AWS_SECRET_ACCESS_KEY
-        codeCollections: 
-          - repoURL: "$repo_url"
-            branch: "$branch_name"
-            codeBundles: [""]
         codeCollections:
         - repoURL: "$repo_url"
           branch: "$branch_name"
