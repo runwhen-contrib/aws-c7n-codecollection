@@ -45,5 +45,6 @@ auth
 .vscode/settings.json
 **.tf.local**
 **.tf.secret**
+**.secret**
 interactive_console_output.xml
 codebundles/aws-c7n-s3-health/.test/terraform/tf.secret

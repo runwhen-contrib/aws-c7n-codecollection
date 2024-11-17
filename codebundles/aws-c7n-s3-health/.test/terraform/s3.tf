@@ -17,7 +17,19 @@ resource "null_resource" "check_bucket_existence" {
   }
 }
 
+resource "null_resource" "remove_public_access_block" {
+  provisioner "local-exec" {
+    command = <<EOT
+    export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+    aws s3control put-public-access-block \
+      --account-id $AWS_ACCOUNT_ID \
+      --public-access-block-configuration BlockPublicAcls=false,BlockPublicPolicy=false
+    EOT
+  }
+}
+
 resource "aws_s3_bucket" "unique_bucket" {
+  depends_on    = [null_resource.check_bucket_existence]
   bucket        = "${var.bucket_prefix}-${random_id.bucket_suffix.hex}"
   force_destroy = false # Disable Terraform's force_destroy
   tags = {
@@ -29,6 +41,7 @@ resource "aws_s3_bucket" "unique_bucket" {
 
 
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
+  depends_on              = [null_resource.remove_public_access_block]
   bucket                  = aws_s3_bucket.unique_bucket.id
   block_public_acls       = false
   ignore_public_acls      = false
