@@ -1,0 +1,22 @@
+apiVersion: runwhen.com/v1
+kind: GenerationRules
+spec:
+  platform: aws
+  generationRules:
+    - resourceTypes:
+        -  aws_s3_bucket
+      matchRules:
+        - type: pattern
+          pattern: ".+"
+          properties: [name]
+          mode: substring
+      slxs:
+        - baseName: aws-c7n-s3-health
+          qualifiers: ["region"]
+          baseTemplateName: aws-c7n-s3-health
+          levelOfDetail: basic
+          outputItems:
+            - type: slx
+            - type: sli
+            - type: runbook
+              templateName: aws-c7n-s3-health-taskset.yaml

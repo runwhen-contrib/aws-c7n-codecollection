@@ -56,9 +56,9 @@ tasks:
             awsAccessKeyId: $AWS_ACCESS_KEY_ID
             awsSecretAccessKey: $AWS_SECRET_ACCESS_KEY
         codeCollections: 
-          - repoURL: "https://github.com/stewartshea/rw-cli-codecollection"
-            branch: "azure/add_sub_vars"
-            codeBundles: ["k8s-namespace-healthcheck", "azure-aks-triage", "k8s-deployment-healthcheck"]
+          - repoURL: "$repo_url"
+            branch: "$branch_name"
+            codeBundles: [""]
         codeCollections:
         - repoURL: "$repo_url"
           branch: "$branch_name"
