@@ -12,7 +12,7 @@ spec:
           mode: substring
       slxs:
         - baseName: aws-c7n-s3-health
-          qualifiers: ["resource"]
+          qualifiers: ["account_id"]
           baseTemplateName: aws-c7n-s3-health
           levelOfDetail: basic
           outputItems:
