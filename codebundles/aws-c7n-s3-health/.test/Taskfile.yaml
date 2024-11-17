@@ -67,6 +67,7 @@ tasks:
       RW_WORKSPACE: '{{.RW_WORKSPACE | default "my-workspace"}}'
     cmds:
       - |
+        source terraform/tf.secret
         repo_url=$(git config --get remote.origin.url)
         branch_name=$(git rev-parse --abbrev-ref HEAD)
         codebundle=$(basename "$(dirname "$PWD")")
@@ -92,8 +93,8 @@ tasks:
         defaultLOD: detailed
         cloudConfig:
           aws: 
-            awsAccessKeyId: $AWS_ACCESS_KEY_ID
-            awsSecretAccessKey: $AWS_SECRET_ACCESS_KEY
+            awsAccessKeyId: "$AWS_ACCESS_KEY_ID"
+            awsSecretAccessKey: "$AWS_SECRET_ACCESS_KEY"
         codeCollections:
         - repoURL: "$repo_url"
           branch: "$branch_name"
@@ -123,9 +124,13 @@ tasks:
 
         echo "Starting new container $CONTAINER_NAME..."
 
-        docker run --name $CONTAINER_NAME -p 8081:8081 -v "$(pwd)":/shared -d ghcr.io/runwhen-contrib/runwhen-local:latest || {
+        docker run --name $CONTAINER_NAME -e DEBUG_LOGGING=true -p 8081:8081 -v "$(pwd)":/shared -d us-docker.pkg.dev/runwhen-nonprod-shared/public-images/runwhen-local:544-merge-ce614201 || {
           echo "Failed to start container"; exit 1;
         }
+
+        # docker run --name $CONTAINER_NAME -e DEBUG_LOGGING=true -p 8081:8081 -v "$(pwd)":/shared -d ghcr.io/runwhen-contrib/runwhen-local:latest || {
+        #   echo "Failed to start container"; exit 1;
+        # }
 
         echo "Running workspace builder script in container..."
         docker exec -w /workspace-builder $CONTAINER_NAME ./run.sh $1 --verbose || {
