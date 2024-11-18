@@ -6,6 +6,7 @@ Force Tags    S3    Bucket    AWS    Storage    Secure
 
 Library    RW.Core
 Library    RW.CLI
+Library    CloudCustodian.Core
 
 Suite Setup    Suite Initialization
 
@@ -17,16 +18,23 @@ List S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-s3-health ${CURDIR}/s3-public-buckets.yaml
     ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-    ${report_data}=    RW.CLI.Run Cli
+    ${report_data}=    RW.CLI.Run Cli                                         # Note: This just an example of parsing with the RW.CLI.Run Cli keyword. 
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-s3-health/s3-public-buckets/resources.json 
-    RW.Core.Add Pre To Report    ${c7n_output.stdout}     # Note: This actual data needs to be parsed to be usable in the report
-    # ${bucket_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
+    RW.Core.Add Pre To Report    ${c7n_output.stdout}     # Note: This actual data needs to be parsed to be usable in the report. Json data in a report like this isn't super useful. 
+
+    ${parsed_results}=    CloudCustodian.Core.Parse Custodian Results         # Note: This just an example of simple parsing with a custom keyword.
+    ...    input_dir=${OUTPUT_DIR}/aws-c7n-s3-health
+    RW.Core.Add Pre To Report    ${parsed_results}  
+
+    # Convert custodian json output to a list. 
     TRY
         ${bucket_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
     EXCEPT
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${bucket_list}=    Create List
     END
+
+    # Generate issues if any resources are in the list
     IF    len(@{bucket_list}) > 0
         FOR    ${item}    IN    @{bucket_list}
             RW.Core.Add Issue        # Note: This is fairly basic issue. Ideally the next steps and details would have more specific recommendations and details. 
