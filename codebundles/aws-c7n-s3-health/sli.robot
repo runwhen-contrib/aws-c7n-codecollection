@@ -1,6 +1,7 @@
 *** Settings ***
 Metadata          Author   stewartshea
-Metadata          Support    AWS    S3
+Metadata          Display Name    AWS S3 Health
+Metadata          Supports    AWS    S3    CloudCustodian
 Documentation     Counts the number of S3 buckets in an Account that are insecure or unhealthy. 
 Force Tags    S3    Bucket    AWS    Storage    Secure
 
