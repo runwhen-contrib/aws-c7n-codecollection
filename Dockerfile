@@ -23,6 +23,10 @@ RUN if [ -f "requirements.txt" ]; then pip install --no-cache-dir -r requirement
 # Add runwhen user to sudoers with no password prompt
 RUN echo "runwhen ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+# Set RunWhen Temp Dir
+RUN mkdir -p /var/tmp/runwhen && chmod 1777 /var/tmp/runwhen
+ENV TMPDIR=/var/tmp/runwhen
+
 # Adjust permissions for runwhen user
 RUN chown runwhen:0 -R $RUNWHEN_HOME/codecollection
 

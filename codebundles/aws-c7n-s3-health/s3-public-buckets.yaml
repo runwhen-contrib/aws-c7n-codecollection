@@ -1,0 +1,21 @@
+policies:
+  - name: s3-public-buckets
+    resource: aws.s3
+    filters:
+      - or:
+          # Public ACLs
+          - type: global-grants
+            permissions: ["READ", "WRITE", "READ_ACP", "WRITE_ACP"]
+          # Public Bucket Policies
+          - type: has-statement
+            statements:
+              - Effect: Allow
+                Principal: "*"
+                Action: "s3:GetObject"
+                Resource: "arn:aws:s3:::*/*"
+          # Block Public Access disabled
+          - type: check-public-block
+            BlockPublicAcls: false
+            IgnorePublicAcls: false
+            BlockPublicPolicy: false
+            RestrictPublicBuckets: false
