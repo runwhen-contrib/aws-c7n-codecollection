@@ -18,3 +18,4 @@ spec:
   statement: The total count of unhealthy or insecure S3 buckets should be 0.   
   additionalContext:
     region: "{{match_resource.resource.region}}"
+    account_id: "{{match_resource.resource.account_id}}"

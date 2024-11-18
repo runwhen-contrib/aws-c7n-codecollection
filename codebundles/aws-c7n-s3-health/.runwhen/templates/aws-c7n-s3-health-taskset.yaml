@@ -23,9 +23,9 @@ spec:
     pathToRobot: codebundles/aws-c7n-d3-health/runbook.robot
   configProvided:
     - name: AWS_REGION
-      value: {{match_resource.resource.region}}
+      value: "{{match_resource.resource.region}}"
     - name: AWS_ACCOUNT_ID
-      value: {{match_resource.resource.account_id}}
+      value: "{{match_resource.resource.account_id}}"
   secretsProvided:
     - name: AWS_ACCESS_KEY_ID
       workspaceKey: {{custom.aws_access_key_id}}
