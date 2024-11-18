@@ -30,7 +30,7 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Region
     ...    pattern=\w*
-    ${AWS_ACCOUNT_ID}=    RW.Core.Import Secret   AWS_ACCOUNT_ID
+    ${AWS_ACCOUNT_ID}=    RW.Core.Import User Variable   AWS_ACCOUNT_ID
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
@@ -42,6 +42,7 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Access Key Secret
     ...    pattern=\w*
+    # This may not work without certain permissions. We might just drop this, but unfortuinately a numberd account ID is less human friendly to include in task titles. 
     ${aws_account_name_query}=       RW.CLI.Run Cli    
     ...    cmd=aws organizations describe-account --account-id $(aws sts get-caller-identity --query 'Account' --output text) --query "Account.Name" --output text | tr -d '\n'
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-s3-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
