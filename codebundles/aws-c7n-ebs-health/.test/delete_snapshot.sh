@@ -1,49 +1,35 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 # Configuration
 REGION="us-west-2"
-EBS_VOLUME_NAME="ebs-test"
+EBS_VOLUME_NAME="ebs-snapshot-test"
 
-# Check if the EBS volume exists
-EBS_VOLUME_ID=$(
-    aws ec2 describe-volumes \
-    --filters Name=tag:Name,Values=$EBS_VOLUME_NAME \
-    --query 'Volumes[0].VolumeId' \
-    --region=$REGION \
-    --output text \
-    --no-cli-pager
-)
 
-if [[ "$EBS_VOLUME_ID" == "None" ]]; then
-    echo "EBS volume with name $EBS_VOLUME_NAME does not exist."
-else
-    # Check for associated snapshots
+# Main function
+delete_snapshot() {
+
+    echo "Checking for existing snapshot with name $EBS_VOLUME_NAME..."
     SNAPSHOT_ID=$(
         aws ec2 describe-snapshots \
-        --filters Name=volume-id,Values=$EBS_VOLUME_ID \
+        --filters Name=tag:Name,Values="$EBS_VOLUME_NAME" \
+        --region="$REGION" \
         --query 'Snapshots[0].SnapshotId' \
-        --region=$REGION \
         --output text \
         --no-cli-pager
     )
 
-    # Delete the snapshot if it exists
-    if [[ "$SNAPSHOT_ID" != "None" ]]; then
-        echo "Deleting snapshot: $SNAPSHOT_ID..."
-        aws ec2 delete-snapshot \
-            --snapshot-id=$SNAPSHOT_ID \
-            --region=$REGION \
-            --no-cli-pager
-        echo "Snapshot $SNAPSHOT_ID deleted successfully."
-    else
-        echo "No snapshot associated with volume $EBS_VOLUME_ID."
+    if [[ "$SNAPSHOT_ID" == "None" ]]; then
+        echo "No snapshot found with the name $EBS_VOLUME_NAME. Exiting."
+        exit 0
     fi
 
-    # Delete the volume
-    echo "Deleting EBS volume: $EBS_VOLUME_ID..."
-    aws ec2 delete-volume \
-        --volume-id=$EBS_VOLUME_ID \
-        --region=$REGION \
-        --no-cli-pager
-    echo "EBS volume $EBS_VOLUME_ID deleted successfully."
-fi
+    echo "Found snapshot: $SNAPSHOT_ID. Deleting..."
+    aws ec2 delete-snapshot --snapshot-id "$SNAPSHOT_ID" --region "$REGION" --no-cli-pager
+    echo "Snapshot $SNAPSHOT_ID deleted successfully."
+}
+
+# Execute the function
+delete_snapshot
