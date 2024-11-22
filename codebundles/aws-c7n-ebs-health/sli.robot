@@ -17,7 +17,7 @@ Check Unattached EBS Volumes in `${AWS_REGION}`
     [Tags]    ebs    storage    aws    volume
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unattached-ebs-volumes.yaml --cache-period 0
-    ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unattached-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
@@ -29,7 +29,7 @@ Check Unencrypted EBS Volumes in `${AWS_REGION}`
     [Tags]    ebs    storage    aws    security    volume
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unencrypted-ebs-volumes.yaml --cache-period 0
-    ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unencrypted-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
@@ -42,7 +42,7 @@ Check Unused EBS Snapshots in `${AWS_REGION}`
     [Tags]    ebs    storage    aws    snapshots    volume
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unused-ebs-snapshots.yaml --cache-period 0
-    ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unused-ebs-snapshots/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
