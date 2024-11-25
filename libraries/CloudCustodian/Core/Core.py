@@ -234,9 +234,6 @@ def parse_ebs_results(input_dir: str):
 
             # Parse metadata.json
             if metadata_file.exists():
-                print("directory...",subdir)
-                if not resource_summary:
-                    continue
                 try:
                     with open(metadata_file, "r") as f:
                         metadata = json.load(f)
@@ -260,8 +257,6 @@ def parse_ebs_results(input_dir: str):
 
             # Parse custodian-run.log
             if log_file.exists():
-                if not resource_summary:
-                    continue
                 try:
                     with open(log_file, "r") as f:
                         logs = f.readlines()
