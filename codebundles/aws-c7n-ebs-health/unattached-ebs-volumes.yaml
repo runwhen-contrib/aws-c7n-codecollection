@@ -1,0 +1,7 @@
+policies:
+  - name: unattached-ebs-volumes
+    resource: ebs
+    filters:
+      - type: value
+        key: "State"
+        value: "available"
