@@ -13,7 +13,7 @@ spec:
           mode: substring
       slxs:
         - baseName: aws-c7n-ebs-health
-          qualifiers: ["region"]
+          qualifiers: ["account_id", "region"]
           baseTemplateName: aws-c7n-ebs-health
           levelOfDetail: basic
           outputItems:
