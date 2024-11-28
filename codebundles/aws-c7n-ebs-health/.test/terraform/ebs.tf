@@ -2,7 +2,7 @@
 resource "aws_ebs_volume" "ebs_volume" {
   availability_zone = var.availability_zone
   size              = var.ebs_volume_size
-  encrypted = false
+  encrypted         = false
   tags = {
     Name = var.ebs_volume_name
   }
