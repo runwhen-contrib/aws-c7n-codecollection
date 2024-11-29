@@ -3,3 +3,4 @@ ruamel.base>=1.0.0
 ruamel.yaml>=0.17.20
 requests>=2
 c7n>=0.9.41
+rw-cli-keywords>=0.0.19
