@@ -9,7 +9,8 @@ metadata:
 spec:
   displayUnitsLong: OK
   displayUnitsShort: ok
-  location: {{default_location}}
+  locations:
+      - {{default_location}}
   description: Measures securitiy and health of S3 buckets in this AWS region and account.
   codeBundle:
     {% if repo_url %}
