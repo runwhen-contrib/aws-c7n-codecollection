@@ -67,7 +67,7 @@ tasks:
       RW_WORKSPACE: '{{.RW_WORKSPACE | default "my-workspace"}}'
     cmds:
       - |
-        source terraform/tf.secret
+        source terraform/cb.secret
         repo_url=$(git config --get remote.origin.url)
         branch_name=$(git rev-parse --abbrev-ref HEAD)
         codebundle=$(basename "$(dirname "$PWD")")
@@ -89,7 +89,7 @@ tasks:
         cat <<EOF > workspaceInfo.yaml
         workspaceName: "$RW_WORKSPACE"
         workspaceOwnerEmail: authors@runwhen.com
-        defaultLocation: location-01
+        defaultLocation: location-01-us-west1
         defaultLOD: detailed
         cloudConfig:
           aws: 
@@ -99,7 +99,9 @@ tasks:
         - repoURL: "$repo_url"
           branch: "$branch_name"
           codeBundles: ["$codebundle"]
-        custom: []
+        custom:
+          aws_access_key_id: AWS_ACCESS_KEY_ID
+          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         EOF
     silent: true
 
@@ -198,6 +200,7 @@ tasks:
     desc: Check if env vars are set for RunWhen Platform
     cmds:
       - |
+        source terraform/cb.secret
         missing_vars=()
 
         if [ -z "$RW_WORKSPACE" ]; then
@@ -227,6 +230,7 @@ tasks:
       cmds:
         - task: check-rwp-config
         - |
+          source terraform/cb.secret
           BASE_DIR="output/workspaces/${RW_WORKSPACE}/slxs"
           if [ ! -d "$BASE_DIR" ]; then
             echo "Directory $BASE_DIR does not exist. Upload aborted."
@@ -272,6 +276,7 @@ tasks:
     cmds:
       - task: check-rwp-config
       - |
+        source terraform/cb.secret
         BASE_DIR="output/workspaces/${RW_WORKSPACE}/slxs"
         if [ ! -d "$BASE_DIR" ]; then
           echo "Directory $BASE_DIR does not exist. Deletion aborted."
