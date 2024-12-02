@@ -1,0 +1,13 @@
+policies:
+  - name: old-ec2-instances
+    resource: ec2
+    comment: |
+      Report {{ state }} instances older than {{ days }} days
+    filters:
+      - "State.Name": {{ state }}
+      {%- for tag in tags %}
+      - "tag:{{tag}}": "present"
+      {%- endfor %}
+      - type: instance-age
+        op: gt
+        days: {{ days }}
