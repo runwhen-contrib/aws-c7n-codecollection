@@ -7,7 +7,7 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://www.shareicon.net/data/128x128/2015/08/28/92177_content_512x512.png
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Storage/Res_Amazon-Elastic-Block-Store_Multiple-Volumes_48.png
   alias: AWS EBS Health For Region {{match_resource.resource.region}}
   asMeasuredBy: The number of AWS EBS volumes and snapshots in region {{match_resource.resource.region}}
   configProvided:

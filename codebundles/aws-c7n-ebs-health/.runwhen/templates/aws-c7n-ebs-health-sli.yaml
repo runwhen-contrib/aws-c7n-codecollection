@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Measures securitiy and health of S3 buckets in this AWS region and account.
+  description: Measures security and health of AWS EBS in this AWS region and account.
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
