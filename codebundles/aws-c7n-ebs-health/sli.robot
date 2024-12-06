@@ -1,15 +1,14 @@
 *** Settings ***
 Metadata          Author   saurabh3460
-Metadata          Support    AWS    EBS
+Metadata          Supports    AWS    EBS    CloudCustodian
+Metadata          Display Name    AWS EBS Health
 Documentation     Counts the number of EBS resources by identifying unattached volumes, unused and aged snapshots, and unencrypted volumes.
-Force Tags    EBS    Volume    AWS    Storage    Secure
+Force Tags    EBS    Volume    AWS    Storage
 
 Library    RW.Core
 Library    RW.CLI
 
 Suite Setup    Suite Initialization
-
-
 
 *** Tasks ***
 Check Unattached EBS Volumes in `${AWS_REGION}`
@@ -21,7 +20,7 @@ Check Unattached EBS Volumes in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unattached-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) >= int(${EVENT_THRESHOLD}) else 0
+    ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unattached_ebs_event_score}
 
 Check Unencrypted EBS Volumes in `${AWS_REGION}`
@@ -33,7 +32,7 @@ Check Unencrypted EBS Volumes in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unencrypted-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unencrypted_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) >= int(${SECURITY_EVENT_THRESHOLD}) else 0
+    ${unencrypted_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${SECURITY_EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unencrypted_ebs_event_score}
 
 
@@ -46,7 +45,7 @@ Check Unused EBS Snapshots in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unused-ebs-snapshots/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unsued_ebs_snapshot_event_score}=    Evaluate    1 if int(${count.stdout}) >= int(${EVENT_THRESHOLD}) else 0
+    ${unsued_ebs_snapshot_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unsued_ebs_snapshot_event_score}
 
 
@@ -78,13 +77,13 @@ Suite Initialization
     ...    description=The minimum number of EBS volumes | snapshots to consider unhealthy.
     ...    pattern=^\d+$
     ...    example=2
-    ...    default=1
+    ...    default=0
     ${SECURITY_EVENT_THRESHOLD}=    RW.Core.Import User Variable    SECURITY_EVENT_THRESHOLD
     ...    type=string
     ...    description=The minimum number of security-related EBS volumes to consider unhealthy.
     ...    pattern=^\d+$
     ...    example=2
-    ...    default=1
+    ...    default=0
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ebs-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
