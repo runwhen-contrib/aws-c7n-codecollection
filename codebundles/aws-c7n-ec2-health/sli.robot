@@ -1,8 +1,9 @@
 *** Settings ***
 Metadata          Author   saurabh3460
-Metadata          Support    AWS    EC2
+Metadata          Supports    AWS    EC2    CloudCustodian
+Metadata          Display Name    AWS EC2 Health
 Documentation     Counts the number of old EC2 instances.
-Force Tags    EC2    Compute    AWS    Instance
+Force Tags    EC2    Compute    AWS
 
 Library    RW.Core
 Library    RW.CLI
@@ -54,7 +55,7 @@ Suite Initialization
     ...    description=The minimum number of old EC2 instance to consider.
     ...    pattern=^\d+$
     ...    example=2
-    ...    default=1
+    ...    default=0
     ${AWS_EC2_STATE}=    RW.Core.Import User Variable    AWS_EC2_STATE
     ...    type=string
     ...    description=The state of AWS_EC2 instances to filter (e.g., running).
