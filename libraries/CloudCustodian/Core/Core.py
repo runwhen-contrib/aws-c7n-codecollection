@@ -215,7 +215,8 @@ def parse_ebs_results(input_dir: str):
                             elif "InstanceId" in resource:
                                 resource_type = "EC2 Instance"
                                 resource_id = resource.get("InstanceId", "Unknown ID")
-
+                                
+                            Id = [id for id in resource.keys() if "id" in id.lower()]
                             resource_location = find_value_recursive(resource, 'AvailabilityZone')[0][:-1]
                             tags = resource.get("Tags", [])
                             if isinstance(tags, list):
@@ -329,6 +330,12 @@ def generate_policy(template_path, **kargs):
         kargs["tags"] = kargs["tags"].replace(" ","").split(",")
     else:
         kargs["tags"] = []
+
+    if "resource_providers" in kargs and kargs["resource_providers"] != "" :
+        kargs["resource_providers"] = kargs["resource_providers"].replace(" ","").split(",")
+    else:
+        kargs["resource_providers"] = []
+
     try:
         template = jinja_env.get_template(template_file)
     except Exception as e:
