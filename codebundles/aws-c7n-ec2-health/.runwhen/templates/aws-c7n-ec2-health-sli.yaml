@@ -25,7 +25,7 @@ spec:
     {% endif %}
     pathToRobot: codebundles/aws-c7n-ec2-health/sli.robot
   intervalStrategy: intermezzo
-  intervalSeconds: 300
+  intervalSeconds: 600
   configProvided:
     - name: AWS_REGION
       value: "{{match_resource.resource.region}}"
