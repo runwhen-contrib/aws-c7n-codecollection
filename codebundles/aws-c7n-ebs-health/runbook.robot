@@ -3,7 +3,7 @@ Metadata          Author    saurabh3460
 Metadata          Supports    AWS    EBS    CloudCustodian
 Metadata          Display Name    AWS EBS Health
 Documentation     Check for AWS EBS resources by identifying unattached volumes, unused snapshots, and unencrypted volumes.
-Force Tags    EBS    Volume    AWS    Storage    Secure
+Force Tags    EBS    Volume    AWS    Storage    Encryption
 
 Library    RW.Core
 Library    RW.CLI
@@ -16,7 +16,7 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  Check for unattached EBS volumes in the specified region. 
-    [Tags]    ebs    storage    aws    volume
+    [Tags]    ebs    storage    aws    volume    unattached
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unattached-ebs-volumes.yaml --cache-period 0
     ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
@@ -33,7 +33,6 @@ List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_
     # Convert custodian json output to a list.
     TRY
         ${ebs_volume_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
-        Log    ${report_data.stdout}
     EXCEPT
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${ebs_volume_list}=    Create List
@@ -54,8 +53,8 @@ List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_
 
 
 List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Check for unattached EBS volumes in the specified region. 
-    [Tags]    ebs    storage    aws    volume
+    [Documentation]  Check for Unencrypted EBS Volumes in the specified region. 
+    [Tags]    ebs    storage    aws    volume    encryption
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unencrypted-ebs-volumes.yaml --cache-period 0
     ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
@@ -72,7 +71,6 @@ List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS
    
     TRY
         ${ebs_volume_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
-        Log    ${report_data.stdout}
     EXCEPT
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${ebs_volume_list}=    Create List
@@ -93,8 +91,8 @@ List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS
 
 
 List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Check for unattached EBS volumes in the specified region. 
-    [Tags]    ebs    storage    aws    volume
+    [Documentation]  Check for Unused EBS Snapshots in the specified region. 
+    [Tags]    ebs    storage    aws    volume    unused
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unused-ebs-snapshots.yaml --cache-period 0
     ...    secret__aws_account_id=${AWS_ACCESS_KEY_ID}
@@ -109,7 +107,6 @@ List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_AC
     ${clean_output_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ebs-health/unused-ebs-snapshots
     TRY
         ${ebs_snapshot_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
-        Log    ${report_data.stdout}
     EXCEPT
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${ebs_snapshot_list}=    Create List
