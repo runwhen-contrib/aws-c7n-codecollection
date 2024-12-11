@@ -20,7 +20,7 @@ Check Unattached EBS Volumes in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unattached-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${EVENT_THRESHOLD}) else 0
+    ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unattached_ebs_event_score}
 
 Check Unencrypted EBS Volumes in `${AWS_REGION}`
@@ -32,7 +32,7 @@ Check Unencrypted EBS Volumes in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unencrypted-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unencrypted_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${SECURITY_EVENT_THRESHOLD}) else 0
+    ${unencrypted_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${SECURITY_EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unencrypted_ebs_event_score}
 
 
@@ -45,7 +45,7 @@ Check Unused EBS Snapshots in `${AWS_REGION}`
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unused-ebs-snapshots/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    ${unsued_ebs_snapshot_event_score}=    Evaluate    1 if int(${count.stdout}) > int(${EVENT_THRESHOLD}) else 0
+    ${unsued_ebs_snapshot_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unsued_ebs_snapshot_event_score}
 
 
