@@ -215,8 +215,11 @@ def parse_ebs_results(input_dir: str):
                             elif "InstanceId" in resource:
                                 resource_type = "EC2 Instance"
                                 resource_id = resource.get("InstanceId", "Unknown ID")
-                                
+                            
+                            # This might not work because some resources have ['OwnerId', 'VpcId', 'DhcpOptionsId']
                             Id = [id for id in resource.keys() if "id" in id.lower()]
+                            resource_id = resource.get(Id, "Unknown ID")
+                            # It's better to pass region as parameter.
                             resource_location = find_value_recursive(resource, 'AvailabilityZone')[0][:-1]
                             tags = resource.get("Tags", [])
                             if isinstance(tags, list):
@@ -270,7 +273,9 @@ def parse_ebs_results(input_dir: str):
                         log_summary.append([subdir.name, error_count, warning_count])
                 except Exception as e:
                     print(f"Error reading custodian-run.log in {subdir}: {e}")
-
+        else:
+            print(f"{subdir} is not a directory")
+            exit
 
     results = []
 
