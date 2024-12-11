@@ -1,0 +1,5 @@
+policies:
+  - name: unencrypted-ebs-volumes
+    resource: ebs
+    filters:
+      - Encrypted: false
