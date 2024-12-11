@@ -28,7 +28,7 @@ Check for old AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ec2-health/old-ec2-instances/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     Log    ${count}
-    ${old_ec2_instances_event_score}=    Evaluate    1 if int(${count.stdout}) >= int(${EVENT_THRESHOLD}) else 0
+    ${old_ec2_instances_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     RW.Core.Push Metric    ${old_ec2_instances_event_score}
 
 
