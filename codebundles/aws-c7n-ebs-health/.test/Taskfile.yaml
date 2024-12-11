@@ -67,7 +67,7 @@ tasks:
       RW_WORKSPACE: '{{.RW_WORKSPACE | default "my-workspace"}}'
     cmds:
       - |
-        source terraform/cb.secret
+        source terraform/tf.secret
         repo_url=$(git config --get remote.origin.url)
         branch_name=$(git rev-parse --abbrev-ref HEAD)
         codebundle=$(basename "$(dirname "$PWD")")
@@ -200,7 +200,7 @@ tasks:
     desc: Check if env vars are set for RunWhen Platform
     cmds:
       - |
-        source terraform/cb.secret
+        source terraform/tf.secret
         missing_vars=()
 
         if [ -z "$RW_WORKSPACE" ]; then
@@ -230,7 +230,7 @@ tasks:
       cmds:
         - task: check-rwp-config
         - |
-          source terraform/cb.secret
+          source terraform/tf.secret
           BASE_DIR="output/workspaces/${RW_WORKSPACE}/slxs"
           if [ ! -d "$BASE_DIR" ]; then
             echo "Directory $BASE_DIR does not exist. Upload aborted."
@@ -276,7 +276,7 @@ tasks:
     cmds:
       - task: check-rwp-config
       - |
-        source terraform/cb.secret
+        source terraform/tf.secret
         BASE_DIR="output/workspaces/${RW_WORKSPACE}/slxs"
         if [ ! -d "$BASE_DIR" ]; then
           echo "Directory $BASE_DIR does not exist. Deletion aborted."
