@@ -1,0 +1,12 @@
+policies:
+{%- for provider in resource_providers %}
+  - name: {{provider}}-tag-poicy
+    resource: {{provider}}
+    {%- if tags|length > 0 %}
+    filters:
+      - or:
+      {%- for tag in tags %}
+        - "tag:{{tag}}": absent
+      {%- endfor %}
+    {% endif %}
+{%- endfor %}
