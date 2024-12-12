@@ -205,7 +205,7 @@ def parse_ebs_results(input_dir: str):
                                 continue
 
                             resource_id = ""
-                            resource_type = ""
+                            resource_type = parse_resource_type_from_arn(arn)
                             if "VolumeType" in resource:
                                 resource_type = "EBS volume"
                                 resource_id = resource.get("VolumeId", "Unknown ID")
