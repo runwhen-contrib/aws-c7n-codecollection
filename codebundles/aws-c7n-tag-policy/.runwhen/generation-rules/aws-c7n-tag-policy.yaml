@@ -12,7 +12,7 @@ spec:
           mode: substring
       slxs:
         - baseName: aws-c7n-tag-policy
-          qualifiers: ["account_id", "resource"]
+          qualifiers: ["account_id"]
           baseTemplateName: aws-c7n-tag-policy
           levelOfDetail: basic
           outputItems:
