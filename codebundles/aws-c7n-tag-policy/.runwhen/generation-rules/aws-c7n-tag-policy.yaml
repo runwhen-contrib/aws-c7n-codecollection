@@ -4,7 +4,7 @@ spec:
   platform: aws
   generationRules:
     - resourceTypes:
-        - aws_ec2_vpcs
+        - aws_ec2_regional_configs
       matchRules:
         - type: pattern
           pattern: ".+"
@@ -12,7 +12,7 @@ spec:
           mode: substring
       slxs:
         - baseName: aws-c7n-tag-policy
-          qualifiers: ["account_id", "region"]
+          qualifiers: ["account_id", "resource"]
           baseTemplateName: aws-c7n-tag-policy
           levelOfDetail: basic
           outputItems:
