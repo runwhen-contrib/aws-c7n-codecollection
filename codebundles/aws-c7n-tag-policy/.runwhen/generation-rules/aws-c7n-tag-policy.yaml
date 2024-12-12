@@ -4,7 +4,7 @@ spec:
   platform: aws
   generationRules:
     - resourceTypes:
-        - aws_iam_users
+        - aws_ec2_vpcs
       matchRules:
         - type: pattern
           pattern: ".+"
