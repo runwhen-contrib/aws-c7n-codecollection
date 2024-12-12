@@ -1,0 +1,9 @@
+policies:
+  - name: unused-ebs-snapshots
+    resource: ebs-snapshot
+    filters:
+      - type: unused
+        value: true
+      - type: volume
+        key: VolumeId
+        value: absent

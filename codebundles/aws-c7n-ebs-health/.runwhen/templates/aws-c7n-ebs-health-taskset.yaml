@@ -1,5 +1,5 @@
 apiVersion: runwhen.com/v1
-kind: ServiceLevelIndicator
+kind: Runbook
 metadata:
   name: {{slx_name}}
   labels:
@@ -7,11 +7,8 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  displayUnitsLong: OK
-  displayUnitsShort: ok
-  locations:
-      - {{default_location}}
-  description: Measures securitiy and health of S3 buckets in this AWS region and account.
+  location: {{default_location}}
+  description: Runs tasks to identify and triage unused or insecure AWS EBS volumes and snapshots.
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
@@ -23,9 +20,7 @@ spec:
     {% else %}
     ref: main
     {% endif %}
-    pathToRobot: codebundles/aws-c7n-d3-health/sli.robot
-  intervalStrategy: intermezzo
-  intervalSeconds: 600
+    pathToRobot: codebundles/aws-c7n-ebs-health/runbook.robot
   configProvided:
     - name: AWS_REGION
       value: "{{match_resource.resource.region}}"
