@@ -42,12 +42,12 @@ List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_
         FOR    ${item}    IN    @{ebs_volume_list}
             RW.Core.Add Issue        
             ...    severity=4
-            ...    expected=EBS volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be attached.
-            ...    actual=EBS volume `${item["VolumeId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unattached.
-            ...    title=Unattached EBS volume `${item["VolumeId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`.
-            ...    reproduce_hint=`${c7n_output.cmd}`
+            ...    expected=EBS volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be attached
+            ...    actual=EBS volume `${item["VolumeId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unattached
+            ...    title=Unattached EBS volume `${item["VolumeId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+            ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${item}
-            ...    next_steps=Escalate to service owner to review of unattached AWS EBS volume in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unattached AWS EBS volume in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
+            ...    next_steps=Escalate to service owner for review of unattached AWS EBS volumes in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unattached AWS EBS volumes in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
 
@@ -80,12 +80,12 @@ List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS
         FOR    ${item}    IN    @{ebs_volume_list}
             RW.Core.Add Issue        
             ...    severity=3
-            ...    expected=EBS volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be encrypted.
-            ...    actual=EBS volume `${item["VolumeId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unencrypted.
-            ...    title=Unencrypted EBS volume `${item["VolumeId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`.
-            ...    reproduce_hint=`${c7n_output.cmd}`
+            ...    expected=EBS volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be encrypted
+            ...    actual=EBS volume `${item["VolumeId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unencrypted
+            ...    title=Unencrypted EBS volume `${item["VolumeId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+            ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${item}
-            ...    next_steps=Escalate to service owner to review Unencrypted AWS EBS volume found in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nEnable encryption of AWS EBS volume in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unencrypted AWS EBS volume in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
+            ...    next_steps=Escalate to service owner for review of unencrypted AWS EBS volumes found in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nEnable encryption of AWS EBS volumes in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unencrypted AWS EBS volumes in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
 
@@ -116,12 +116,12 @@ List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_AC
         FOR    ${item}    IN    @{ebs_snapshot_list}
             RW.Core.Add Issue        
             ...    severity=4
-            ...    expected=EBS snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be in use.
-            ...    actual=EBS Snapshots `${item["SnapshotId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unused.
-            ...    title=Unused EBS Snapshot `${item["SnapshotId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`.
-            ...    reproduce_hint=`${c7n_output.cmd}`
+            ...    expected=EBS snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` should be in use
+            ...    actual=EBS Snapshots `${item["SnapshotId"]}` in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` is unused
+            ...    title=Unused EBS Snapshot `${item["SnapshotId"]}` detected in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+            ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${item}
-            ...    next_steps=Escalate to service owner for review of unused EBS Snapshot in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unused EBS Snapshot in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
+            ...    next_steps=Escalate to service owner for review of unused EBS snapshots in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete unused EBS snapshots in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
 

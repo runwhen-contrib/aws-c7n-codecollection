@@ -8,8 +8,8 @@ metadata:
     {% include "common-annotations.yaml" %}
 spec:
   imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Storage/Res_Amazon-Elastic-Block-Store_Multiple-Volumes_48.png
-  alias: AWS EBS Health For Region {{match_resource.resource.region}}
-  asMeasuredBy: The number of AWS EBS volumes and snapshots in region {{match_resource.resource.region}}
+  alias: AWS EBS Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of AWS EBS volumes and snapshots in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
