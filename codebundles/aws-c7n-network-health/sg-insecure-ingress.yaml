@@ -1,0 +1,13 @@
+policies:
+  - name: sg-insecure-ingress
+    resource: security-group
+    description: |
+      Detect any rule from a security group that allows 0.0.0.0/0 or ::/0 (IPv6) ingress
+    filters:
+      - or:
+            - type: ingress
+              Cidr:
+                value: "0.0.0.0/0"
+            - type: ingress
+              CidrV6:
+                value: "::/0"
