@@ -2,7 +2,7 @@
 Metadata          Author   saurabh3460
 Metadata          Supports    AWS    EC2    CloudCustodian
 Metadata          Display Name    AWS EC2 Health
-Documentation     Counts the number of old EC2 instances.
+Documentation     Count the number of EC2 instances with degraded health status in a specified AWS region
 Force Tags    EC2    Compute    AWS
 
 Library    RW.Core
