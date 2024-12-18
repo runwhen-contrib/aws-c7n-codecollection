@@ -1,0 +1,90 @@
+{
+  "policy": {
+    "name": "high-risk-security-groups",
+    "resource": "security-group",
+    "description": "Detect any rule from a security group that allows 0.0.0.0/0 or ::/0 (IPv6) ingress\n",
+    "filters": [
+      {
+        "or": [
+          {
+            "type": "ingress",
+            "Cidr": {
+              "value": "0.0.0.0/0",
+              "key": "CidrIp"
+            }
+          },
+          {
+            "type": "ingress",
+            "CidrV6": {
+              "value": "::/0"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "version": "0.9.41",
+  "execution": {
+    "id": "0e4aae54-e325-4542-8378-a6a3a3f2cbb1",
+    "start": 1734077196.5031362,
+    "end_time": 1734077198.6784065,
+    "duration": 2.1752703189849854
+  },
+  "config": {
+    "region": "us-west-2",
+    "regions": [
+      "us-west-2"
+    ],
+    "cache": "~/.cache/cloud-custodian.cache",
+    "profile": null,
+    "account_id": "971422712704",
+    "assume_role": null,
+    "session_policy": null,
+    "external_id": null,
+    "log_group": null,
+    "tracer": null,
+    "metrics_enabled": null,
+    "metrics": null,
+    "output_dir": "/home/saurabh/Desktop/Workspace/runwhen/aws-c7n-codecollection/codebundles/aws-c7n-network-health/custodian-output",
+    "cache_period": 0,
+    "dryrun": false,
+    "authorization_file": null,
+    "subparser": "run",
+    "config": null,
+    "configs": [
+      "public-sg.yaml"
+    ],
+    "policy_filters": [],
+    "resource_types": [],
+    "verbose": null,
+    "quiet": null,
+    "debug": false,
+    "skip_validation": false,
+    "command": "c7n.commands.run",
+    "vars": null
+  },
+  "sys-stats": {},
+  "api-stats": {
+    "ec2.DescribeSecurityGroups": 1
+  },
+  "metrics": [
+    {
+      "MetricName": "ResourceCount",
+      "Timestamp": "2024-12-13T13:36:38.677544",
+      "Value": 2,
+      "Unit": "Count"
+    },
+    {
+      "MetricName": "ResourceTime",
+      "Timestamp": "2024-12-13T13:36:38.677564",
+      "Value": 2.1632585525512695,
+      "Unit": "Seconds"
+    },
+    {
+      "MetricName": "ActionTime",
+      "Timestamp": "2024-12-13T13:36:38.678386",
+      "Value": 7.152557373046875e-06,
+      "Unit": "Seconds"
+    }
+  ]
+}

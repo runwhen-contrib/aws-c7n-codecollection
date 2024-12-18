@@ -1,0 +1,26 @@
+2024-12-13 13:34:52,621 - custodian.output - ERROR - Error while executing policy
+Traceback (most recent call last):
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/policy.py", line 330, in run
+    resources = self.policy.resource_manager.resources()
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/query.py", line 540, in resources
+    resources = self.source.resources(query)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/query.py", line 230, in resources
+    return self.query.filter(self.manager, **query)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/query.py", line 75, in filter
+    return self._invoke_client_enum(
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/query.py", line 53, in _invoke_client_enum
+    data = results.build_full_result()
+  File "/home/saurabh/.local/lib/python3.10/site-packages/botocore/paginate.py", line 479, in build_full_result
+    for response in self:
+  File "/home/saurabh/.local/lib/python3.10/site-packages/botocore/paginate.py", line 269, in __iter__
+    response = self._make_request(current_kwargs)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/query.py", line 767, in _make_request
+    return self.retry(self._method, **current_kwargs)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/c7n/utils.py", line 457, in _retry
+    return func(*args, **kw)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/botocore/client.py", line 569, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+  File "/home/saurabh/.local/lib/python3.10/site-packages/botocore/client.py", line 1023, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (UnauthorizedOperation) when calling the DescribeSecurityGroups operation: You are not authorized to perform this operation. User: arn:aws:iam::971422712704:user/custodian is not authorized to perform: ec2:DescribeSecurityGroups because no identity-based policy allows the ec2:DescribeSecurityGroups action
+2024-12-13 13:36:38,676 - custodian.policy - INFO - policy:high-risk-security-groups resource:security-group region:us-west-2 count:2 time:2.16
