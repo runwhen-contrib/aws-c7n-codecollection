@@ -7,9 +7,9 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://logowik.com/content/uploads/images/aws-ec24128.jpg
-  alias: AWS EC2 Health For Region {{match_resource.resource.region}}
-  asMeasuredBy: The number of old EC2 instances in region {{match_resource.resource.region}}
+  imageURL: https://PLACEHOLDER
+  alias: AWS EC2 Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of old EC2 instances in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
