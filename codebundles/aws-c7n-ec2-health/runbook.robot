@@ -2,7 +2,7 @@
 Metadata          Author   saurabh3460
 Metadata          Supports    AWS    EC2    CloudCustodian
 Metadata          Display Name    AWS EC2 Health
-Documentation     List old EC2 instances.
+Documentation     Check health of EC2 instances to maintain performance and adherence to best practices.
 Force Tags    EC2    Compute    AWS
 
 Library    RW.Core
@@ -38,7 +38,6 @@ List old AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_A
     
     TRY
         ${ec2_instances_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
-        Log    ${report_data.stdout}
     EXCEPT
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${ec2_instances_list}=    Create List
@@ -48,12 +47,12 @@ List old AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_A
         FOR    ${item}    IN    @{ec2_instances_list}
             RW.Core.Add Issue        
             ...    severity=4
-            ...    expected=EC2 instance in AWS Account `${AWS_ACCOUNT_ID}` should not be older than `${AWS_EC2_AGE}`.
-            ...    actual=EC2 instance `${item["InstanceId"]}` is older than `${AWS_EC2_AGE}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` detected.
+            ...    expected=EC2 instance in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be older than `${AWS_EC2_AGE}`
+            ...    actual=EC2 instance `${item["InstanceId"]}` is older than `${AWS_EC2_AGE}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` detected
             ...    title=Old EC2 instance `${item["InstanceId"]}` detected in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-            ...    reproduce_hint=Review the old ec2 instance details and usage in the AWS Management Console or CLI.
-            ...    details=${item}        # Include complete details.
-            ...    next_steps="Escalate to service owner to review of Old AWS EC2 instance in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`. Delete Old AWS EC2 instance in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`."
+            ...    reproduce_hint=${c7n_output.cmd}
+            ...    details=${item}
+            ...    next_steps=Escalate to service owner to review of Old AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`.\nDelete Old AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
 
