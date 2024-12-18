@@ -15,25 +15,26 @@ resource "aws_key_pair" "my_ec2_key" {
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
-# Fetch the VPC
-data "aws_vpc" "control_tower_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["aws-controltower-VPC"]
+# Create a new VPC
+resource "aws_vpc" "new_vpc" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = false
+
+  tags = {
+    Name = "private-vpc"
   }
 }
 
-data "aws_subnets" "subnets" {
-  #   vpc_id = data.aws_vpc.control_tower_vpc.id
+# Create Private Subnet
+resource "aws_subnet" "private_subnet" {
+  vpc_id            = aws_vpc.new_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-west-2a"
 
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.control_tower_vpc.id]
+  tags = {
+    Name = "private-subnet"
   }
-}
-
-locals {
-  first_subnet = element(data.aws_subnets.subnets.ids, 0)
 }
 
 # Amazon Linux 2 AMI
@@ -51,7 +52,7 @@ data "aws_ami" "amazon_linux_2" {
 resource "aws_security_group" "instance_sg" {
   name        = "test-instance-sg"
   description = "Security group for test EC2 instance"
-  vpc_id      = data.aws_vpc.control_tower_vpc.id
+  vpc_id      = aws_vpc.new_vpc.id
 
   ingress {
     from_port   = 22
@@ -77,8 +78,8 @@ resource "aws_instance" "test_instance" {
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = "t2.micro"
 
-  # Use the subnet from the Control Tower VPC
-  subnet_id = local.first_subnet
+  # Use the private subnet
+  subnet_id = aws_subnet.private_subnet.id
 
   # Associate the security group
   vpc_security_group_ids = [aws_security_group.instance_sg.id]
@@ -101,11 +102,11 @@ output "instance_private_ip" {
 }
 
 output "vpc_id" {
-  value = data.aws_vpc.control_tower_vpc.id
+  value = aws_vpc.new_vpc.id
 }
 
 output "subnet_id" {
-  value = local.first_subnet
+  value = aws_subnet.private_subnet.id
 }
 
 output "private_key" {
