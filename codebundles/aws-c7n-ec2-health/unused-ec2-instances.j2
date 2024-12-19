@@ -1,10 +1,10 @@
 policies:
-  - name: old-ec2-instances
+  - name: unused-ec2-instances
     resource: ec2
     comment: |
-      Report {{ state }} instances older than {{ days }} days
+      Report unused instances older than {{ days }} days
     filters:
-      - "State.Name": {{ state }}
+      - "State.Name": stopped
       {%- for tag in tags %}
       - "tag:{{tag}}": "present"
       {%- endfor %}
