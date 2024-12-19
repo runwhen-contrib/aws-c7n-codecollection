@@ -9,13 +9,13 @@ metadata:
 spec:
   imageURL: https://PLACEHOLDER
   alias: AWS EC2 Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
-  asMeasuredBy: The number of old EC2 instances in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of unused and unpatched EC2 instances in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
   owners:
   - {{workspace.owner_email}}
-  statement: Helps identify aged EC2 instances in the region for proactive resource cleanup and cost optimization.
+  statement: Helps identify unused and unpatched EC2 instances in the region {{match_resource.resource.region}} for proactive resource cleanup and security.
   additionalContext:
     region: "{{match_resource.resource.region}}"
     account_id: "{{match_resource.resource.account_id}}"
