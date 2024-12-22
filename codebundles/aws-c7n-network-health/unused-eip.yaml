@@ -1,0 +1,10 @@
+# Define policies for Cloud Custodian
+policies:
+  # Policy to identify unused Elastic IPs
+  - name: unused-eip
+    resource: elastic-ip
+    filters:
+      # Filter to find Elastic IPs that are not associated with any instance or network interface
+      - or:
+        - InstanceId: absent  # Elastic IP not associated with any EC2 instance
+        - AssociationId: absent  # Elastic IP not associated with any network interface
