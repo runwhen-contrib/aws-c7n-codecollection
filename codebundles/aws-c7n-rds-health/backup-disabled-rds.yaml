@@ -1,0 +1,10 @@
+policies:
+  - name: backup-disabled-rds
+    description: |
+      Policy checks for RDS instances that have backups disabled.
+      It identifies RDS instances where the BackupRetentionPeriod is set to 0
+    resource: rds
+    filters:
+      - type: value
+        key: BackupRetentionPeriod
+        value: 0
