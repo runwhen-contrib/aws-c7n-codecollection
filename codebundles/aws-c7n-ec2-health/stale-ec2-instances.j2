@@ -1,8 +1,8 @@
 policies:
-  - name: unpatched-ec2-instances
+  - name: stale-ec2-instances
     resource: ec2
     comment: |
-      Report unpatched instances older than {{ days }} days
+      Report stale instances older than {{ days }} days
     filters:
       - "State.Name": running
       {%- for tag in tags %}
