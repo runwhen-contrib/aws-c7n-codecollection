@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Measures securitiy and health of AWS EC2 Instnaces in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  description: Count the number of EC2 instances that are stale or stopped in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
