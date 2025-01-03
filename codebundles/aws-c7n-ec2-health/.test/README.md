@@ -12,30 +12,20 @@ With the following policy:
 
 ```json
 {
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Sid": "VisualEditor0",
-			"Effect": "Allow",
-			"Action": [
-				"tag:GetResources",
-				"ec2:DescribeInstances",
-				"ec2:DescribeTags",
-				"autoscaling:DescribeTags",
-				"autoscaling:DescribeLaunchConfigurations",
-				"ec2:DescribeRegions",
-				"ec2:DescribeSnapshots",
-				"ec2:DescribeVolumeAttribute",
-				"ec2:DescribeSecurityGroups",
-				"ec2:DescribeImages",
-				"ec2:DescribeVolumeStatus",
-				"autoscaling:DescribeAutoScalingGroups",
-				"ec2:DescribeVpcs",
-				"ec2:DescribeVolumes"
-			],
-			"Resource": "*"
-		}
-	]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "tag:GetResources",
+                "ec2:DescribeInstances",
+                "ec2:DescribeRegions",
+                "ec2:DescribeTags"
+            ],
+            "Resource": "*"
+        }
+    ]
 }
 ```
 
