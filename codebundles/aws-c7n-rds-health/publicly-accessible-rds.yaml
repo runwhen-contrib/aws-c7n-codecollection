@@ -1,0 +1,8 @@
+policies:
+  - name: publicly-accessible-rds
+    description: |
+      Find publicly accessible RDS instances
+    resource: rds
+    filters:
+      # Filter for RDS instances that are publicly accessible
+      - PubliclyAccessible: true
