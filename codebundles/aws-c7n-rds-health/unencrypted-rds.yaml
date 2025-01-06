@@ -1,0 +1,7 @@
+policies:
+  - name: unencrypted-rds
+    description: |
+      This policy identifies RDS instances that are not encrypted.
+    resource: rds
+    filters:
+      - StorageEncrypted: false
