@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Measures security and health of AWS network by identifying security groups allowing public IP access and unused Elastic IPs in AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  description: Count publicly accessible security groups, unused EIPs, and ELBs in AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
