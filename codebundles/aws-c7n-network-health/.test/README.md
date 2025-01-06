@@ -12,18 +12,24 @@ with the following policy:
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeAddresses",
-                "ec2:DescribeSecurityGroups"
-            ],
-            "Resource": "*"
-        }
-    ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"tag:GetResources",
+				"ec2:DescribeRegions",
+				"ec2:DescribeInstances",
+				"ec2:DescribeAddresses",
+				"ec2:DescribeSecurityGroups",
+				"elasticloadbalancing:DescribeTags",
+				"elasticloadbalancing:DescribeTargetGroups",
+				"elasticloadbalancing:DescribeLoadBalancers"
+			],
+			"Resource": "*"
+		}
+	]
 }
 ```
 
