@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Count the number of RDS instances that are unencrypted, publicly accessible, or have backups disabled in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  description: Score RDS Health (1 = Healthy, 0 = Unhealty) by identifying RDS instances that are unencrypted, publicly accessible, or have backups disabled in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
