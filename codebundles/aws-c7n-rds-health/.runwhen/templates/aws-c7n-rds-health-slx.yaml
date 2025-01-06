@@ -7,7 +7,7 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://PLACEHOLDER.png
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Database/Res_Amazon-Aurora_Amazon-RDS-Instance_48.svg
   alias: AWS RDS Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
   asMeasuredBy: The number of RDS instances with unencrypted, publicly accessible, or have backups disabled in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
