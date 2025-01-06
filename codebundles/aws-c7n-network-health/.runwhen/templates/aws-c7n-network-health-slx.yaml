@@ -9,13 +9,13 @@ metadata:
 spec:
   imageURL: https://PLACEHOLDER.png
   alias: AWS Network Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
-  asMeasuredBy: The number of security groups allowing public IP access and unused Elastic IPs in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of publicly accessible security groups, unused EIPs, and ELBs in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
   owners:
   - {{workspace.owner_email}}
-  statement: The total count of unhealthy AWS network resources. 
+  statement: Identify publicly accessible security groups, unused EIPs, and ELBs in the region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   additionalContext:
     region: "{{match_resource.resource.region}}"
     account_id: "{{match_resource.resource.account_id}}"
