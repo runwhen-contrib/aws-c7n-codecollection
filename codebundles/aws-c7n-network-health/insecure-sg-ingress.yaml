@@ -1,5 +1,5 @@
 policies:
-  - name: sg-insecure-ingress
+  - name: insecure-sg-ingress
     resource: security-group
     description: |
       Detect any rule from a security group that allows 0.0.0.0/0 or ::/0 (IPv6) ingress
