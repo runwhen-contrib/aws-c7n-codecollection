@@ -58,6 +58,58 @@ resource "aws_eip" "unused_eip" {
   }
 }
 
+# Create a public subnet
+resource "aws_subnet" "public_subnet" {
+  vpc_id                  = aws_vpc.private_vpc.id
+  cidr_block              = "10.1.1.0/24"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "public-subnet"
+  }
+}
+
+# Create an internet gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.private_vpc.id
+
+  tags = {
+    Name = "main-igw"
+  }
+}
+
+# Create a route table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.private_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+# Associate the route table with the public subnet
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public.id
+}
+
+# Create an unused Network Load Balancer (NLB)
+resource "aws_lb" "unused_nlb" {
+  name               = "unused-nlb"
+  internal           = false
+  load_balancer_type = "network"
+  subnets            = [aws_subnet.public_subnet.id]
+
+  tags = {
+    Name = "unused-nlb"
+  }
+}
+
 # Optional: Output the VPC ID and Security Group ID
 output "private_vpc_id" {
   value = aws_vpc.private_vpc.id
@@ -65,4 +117,8 @@ output "private_vpc_id" {
 
 output "insecure_sg_id" {
   value = aws_security_group.insecure_sg.id
+}
+
+output "unused_nlb_arn" {
+  value = aws_lb.unused_nlb.arn
 }
