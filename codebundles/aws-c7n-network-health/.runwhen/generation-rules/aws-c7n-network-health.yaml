@@ -5,7 +5,6 @@ spec:
   generationRules:
     - resourceTypes:
         - aws_ec2_security_groups
-        - aws_ec2_eips
       matchRules:
         - type: pattern
           pattern: ".+"
