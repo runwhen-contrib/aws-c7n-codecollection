@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+List Unencrypted RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unencrypted RDS instances
     [Tags]    aws    rds    database    encryption 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -50,7 +50,7 @@ List unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${A
     END
 
 
-List publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+List Publicly Accessible RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible RDS instances
     [Tags]    aws    rds    database    security 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -87,8 +87,8 @@ List publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS acco
         END
     END
 
-List disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Find RDS instances with backups disabled
+List RDS Instances with Backups Disabled in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Identify RDS instances with backups disabled
     [Tags]    aws    rds    database    backups 
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-rds-health ${CURDIR}/backup-disabled-rds.yaml --cache-period 0
