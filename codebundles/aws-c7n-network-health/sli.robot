@@ -2,8 +2,8 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS network health
-Documentation        Check AWS network health.
-Force Tags    Tag    AWS    security-group    network
+Documentation        Count publicly accessible security groups, unused EIPs, and ELBs.
+Force Tags    Tag    AWS    security-group    elb    eip    network        
 
 Library    RW.Core
 Library    RW.CLI
@@ -13,35 +13,47 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-Check for public IP access in security group in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Find security groups that allow public ingress
+Check for publicly accessible security groups in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
     [Tags]    aws    security-group    network 
     ${c7n_output}=    RW.CLI.Run Cli
-    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-network-health ${CURDIR}/sg-insecure-ingress.yaml --cache-period 0
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-network-health ${CURDIR}/insecure-sg-ingress.yaml --cache-period 0
     ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
-    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-network-health/sg-insecure-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${public_ip_access_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
-    Set Global Variable    ${public_ip_access_event_score}
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-network-health/insecure-sg-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+    ${public_ip_access_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    Set Global Variable    ${public_ip_access_score}
 
 
 Check for unused Elastic IPs in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
-    [Tags]    aws    elastic-ip    network 
+    [Tags]    aws    eip    network 
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-network-health ${CURDIR}/unused-eip.yaml --cache-period 0
     ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-network-health/unused-eip/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${unattached_eip_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
-    Set Global Variable    ${unattached_eip_event_score}
+    ${unattached_eip_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    Set Global Variable    ${unattached_eip_score}
+
+Check for unused ELBs in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find unused Application Load Balancers (ALBs) and elb Load Balancers (NLBs) that do not have any associated targets
+    [Tags]    aws    elb    network 
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-elb-health ${CURDIR}/unused-elb.yaml --cache-period 0
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ${count}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-elb-health/unused-elb/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+    ${unused_elb_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    Set Global Variable    ${unused_elb_score}
 
 
 Generate Health Score
-    ${ebs_health_score}=      Evaluate  (${public_ip_access_event_score} + ${unattached_eip_event_score}) / 2
-    ${health_score}=      Convert to Number    ${ebs_health_score}  2
+    ${health_score}=      Evaluate  (${public_ip_access_score} + ${unattached_eip_score} + ${unused_elb_score}) / 3
+    ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
 
 ** Keywords ***
@@ -64,7 +76,7 @@ Suite Initialization
     ...    pattern=\w*
     ${EVENT_THRESHOLD}=    RW.Core.Import User Variable    EVENT_THRESHOLD
     ...    type=string
-    ...    description=The minimum number of network resources to consider unsecured and unhealthy
+    ...    description=The minimum number of network resources to consider unsecured
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
