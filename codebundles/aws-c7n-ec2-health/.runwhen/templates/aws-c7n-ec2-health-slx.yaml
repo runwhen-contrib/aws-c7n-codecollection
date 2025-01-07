@@ -7,7 +7,7 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://PLACEHOLDER
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Compute/Res_Amazon-EC2_Instances_48.svg
   alias: AWS EC2 Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
   asMeasuredBy: The number of stale and stopped EC2 instances in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
