@@ -144,7 +144,7 @@ Suite Initialization
     ${AWS_EC2_TAGS}=    RW.Core.Import User Variable    AWS_EC2_TAGS
     ...    type=string
     ...    description=Comma separated list of tags to filter AWS EC2 instances.
-    ...    pattern=^[a-zA-Z0-9,]+$
+    ...    pattern=^\d+$
     ...    example=Name,Environment
     ...    default=""
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ec2-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
