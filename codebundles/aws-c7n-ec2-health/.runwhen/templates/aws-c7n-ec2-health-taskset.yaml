@@ -26,6 +26,14 @@ spec:
       value: "{{match_resource.resource.region}}"
     - name: AWS_ACCOUNT_ID
       value: "{{match_resource.resource.account_id}}"
+    - name: AWS_EC2_AGE
+      value: '60'
+    - name: AWS_EC2_TAGS
+      value: ''
+    - name: MAX_ALLOWED_STOPPED_INSTANCES
+      value: '0'
+    - name: MAX_ALLOWED_STALE_INSTANCES
+      value: '0'
   secretsProvided:
     - name: AWS_ACCESS_KEY_ID
       workspaceKey: {{custom.aws_access_key_id}}
