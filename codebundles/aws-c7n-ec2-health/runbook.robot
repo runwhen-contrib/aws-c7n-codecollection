@@ -48,15 +48,14 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
 
         # Loop through each EC2 instance in the list
         FOR    ${item}    IN    @{ec2_instances_list}
-            ${item_details}=    RW.CLI.Run Cli
-        ...    cmd=echo ${item} | jq . 
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
             RW.Core.Add Issue        
             ...    severity=3
             ...    actual=EC2 instance in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be stale for more than `${AWS_EC2_AGE}` days
             ...    expected=EC2 instance `${item["InstanceId"]}` has been stale for more than `${AWS_EC2_AGE}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    title=Stale EC2 instance `${item["InstanceId"]}` found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${item_details.stdout}
+            ...    details=${pretty_item}
             ...    next_steps=Patch and restart EC2 instances in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete stale AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
@@ -96,13 +95,14 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
 
         # Loop through each EC2 instance in the list
         FOR    ${item}    IN    @{ec2_instances_list}
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
             RW.Core.Add Issue        
             ...    severity=4
             ...    expected=EC2 instance in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be stopped for more than `${AWS_EC2_AGE}` days
             ...    actual=EC2 instance `${item["InstanceId"]}` has been stopped for more than `${AWS_EC2_AGE}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    title=Stopped EC2 instance `${item["InstanceId"]}` found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${item}
+            ...    details=${pretty_item}
             ...    next_steps=Delete stopped AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
