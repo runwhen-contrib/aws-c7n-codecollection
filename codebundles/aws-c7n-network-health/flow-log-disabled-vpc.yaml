@@ -1,0 +1,6 @@
+policies:
+  - name: flow-log-disabled-vpc
+    resource: vpc
+    filters:
+      - type: flow-logs
+        enabled: false
