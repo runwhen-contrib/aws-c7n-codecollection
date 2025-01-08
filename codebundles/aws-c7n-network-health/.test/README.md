@@ -19,13 +19,20 @@ with the following policy:
 			"Effect": "Allow",
 			"Action": [
 				"tag:GetResources",
+				"ec2:DescribeVpcs",
+				"ec2:DescribeImages",
+				"ec2:DescribeSubnets",
 				"ec2:DescribeRegions",
+				"ec2:DescribeKeyPairs",
+				"ec2:DescribeFlowLogs",
 				"ec2:DescribeInstances",
+				"ec2:DescribeSnapshots",
 				"ec2:DescribeAddresses",
 				"ec2:DescribeSecurityGroups",
 				"elasticloadbalancing:DescribeTags",
 				"elasticloadbalancing:DescribeTargetGroups",
-				"elasticloadbalancing:DescribeLoadBalancers"
+				"elasticloadbalancing:DescribeLoadBalancers",
+				"elasticloadbalancing:DescribeLoadBalancerAttributes"
 			],
 			"Resource": "*"
 		}
