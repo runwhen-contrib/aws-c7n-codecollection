@@ -7,6 +7,7 @@ The SLI produces a score of 0 (bad), 1(good), or a value in between. This score 
 - Public IP access in security group
 - Unused Elastic IP
 - Unused Elastic Loadbalancer
+- VPCs with flow logs disabled
 
 The score of each check is added up and then divided by the total amount of checks. 
 
