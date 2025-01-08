@@ -13,43 +13,54 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-Check for publicly accessible security groups in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
-    [Tags]    aws    security-group    network 
-    ${c7n_output}=    RW.CLI.Run Cli
-    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-network-health ${CURDIR}/insecure-sg-ingress.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-    ${count}=     RW.CLI.Run Cli
-    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-network-health/insecure-sg-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${public_ip_access_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    [Tags]    aws    security-group    network
+    ${total_count}=    Set Variable    0
+    FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
+        ${c7n_output}=    RW.CLI.Run Cli
+        ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/insecure-sg-ingress.yaml --cache-period 0
+        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+        ${count}=     RW.CLI.Run Cli
+        ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/insecure-sg-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+        ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
+    END
+    ${public_ip_access_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${public_ip_access_score}
 
 
-Check for unused Elastic IPs in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
     [Tags]    aws    eip    network 
-    ${c7n_output}=    RW.CLI.Run Cli
-    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-network-health ${CURDIR}/unused-eip.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-    ${count}=     RW.CLI.Run Cli
-    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-network-health/unused-eip/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${unattached_eip_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    ${total_count}=    Set Variable    0
+    FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
+        ${c7n_output}=    RW.CLI.Run Cli
+        ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/unused-eip.yaml --cache-period 0
+        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+        ${count}=     RW.CLI.Run Cli
+        ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-eip/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+        ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
+    END
+    ${unattached_eip_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unattached_eip_score}
 
-Check for unused ELBs in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Find unused Application Load Balancers (ALBs) and elb Load Balancers (NLBs) that do not have any associated targets
+Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets
     [Tags]    aws    elb    network 
-    ${c7n_output}=    RW.CLI.Run Cli
-    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-elb-health ${CURDIR}/unused-elb.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-    ${count}=     RW.CLI.Run Cli
-    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-elb-health/unused-elb/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${unused_elb_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    ${total_count}=    Set Variable    0
+    FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
+        ${c7n_output}=    RW.CLI.Run Cli
+        ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/unused-elb.yaml --cache-period 0
+        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+        ${count}=     RW.CLI.Run Cli
+        ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-elb/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+        ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
+    END
+    ${unused_elb_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unused_elb_score}
-
 
 Generate Health Score
     ${health_score}=      Evaluate  (${public_ip_access_score} + ${unattached_eip_score} + ${unused_elb_score}) / 3
@@ -81,6 +92,12 @@ Suite Initialization
     ...    example=2
     ...    default=0
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-network-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
+    ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
+    ...    cmd=aws ec2 describe-regions --region ${AWS_REGION} --query 'Regions[*].RegionName' --output json
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ${AWS_ENABLED_REGIONS}=    Evaluate    json.loads(r'''${AWS_ENABLED_REGIONS.stdout}''')    json
+    Set Suite Variable    ${AWS_ENABLED_REGIONS}    ${AWS_ENABLED_REGIONS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
