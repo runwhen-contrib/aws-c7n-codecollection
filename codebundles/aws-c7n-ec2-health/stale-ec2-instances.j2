@@ -1,0 +1,13 @@
+policies:
+  - name: stale-ec2-instances
+    resource: ec2
+    comment: |
+      Report stale instances older than {{ days }} days
+    filters:
+      - "State.Name": running
+      {%- for tag in tags %}
+      - "tag:{{tag}}": "present"
+      {%- endfor %}
+      - type: instance-age
+        op: gt
+        days: {{ days }}
