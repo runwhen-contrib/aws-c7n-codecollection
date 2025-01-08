@@ -27,7 +27,7 @@ Check for stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ec2-health/stale-ec2-instances/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     Log    ${count}
-    ${stale_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    ${stale_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_ALLOWED_STALE_INSTANCES}) else 0
     Set Global Variable    ${stale_ec2_instances_score}
 
 Check for stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
@@ -44,7 +44,7 @@ Check for stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ec2-health/stopped-ec2-instances/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     Log    ${count}
-    ${stopped_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
+    ${stopped_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_ALLOWED_STOPPED_INSTANCES}) else 0
     Set Global Variable    ${stopped_ec2_instances_score}
 
 
@@ -71,9 +71,15 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Access Key Secret
     ...    pattern=\w*
-    ${EVENT_THRESHOLD}=    RW.Core.Import User Variable    EVENT_THRESHOLD
+    ${MAX_ALLOWED_STOPPED_INSTANCES}=    RW.Core.Import User Variable    MAX_ALLOWED_STOPPED_INSTANCES
     ...    type=string
-    ...    description=The minimum number of EC2 instance to consider.
+    ...    description=The maxiumum number of stopped EC2 instances to allow.
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
+    ${MAX_ALLOWED_STALE_INSTANCES}=    RW.Core.Import User Variable    MAX_ALLOWED_STALE_INSTANCES
+    ...    type=string
+    ...    description=The maxiumum number of stale EC2 instances to allow.
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
@@ -82,18 +88,19 @@ Suite Initialization
     ...    description=The age (in days) for EC2 instances to be considered stale.
     ...    pattern=^\d+$
     ...    example=60
-    ...    default=60
+    ...    default="60"
     ${AWS_EC2_TAGS}=    RW.Core.Import User Variable    AWS_EC2_TAGS
     ...    type=string
     ...    description=Comma separated list of tags to filter AWS EC2 instances.
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=Name,Environment
-    ...    default=
+    ...    default=""
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ec2-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     Set Suite Variable    ${AWS_EC2_AGE}    ${AWS_EC2_AGE}
     Set Suite Variable    ${AWS_EC2_TAGS}    ${AWS_EC2_TAGS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
-    Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
+    Set Suite Variable    ${MAX_ALLOWED_STOPPED_INSTANCES}    ${MAX_ALLOWED_STOPPED_INSTANCES}
+    Set Suite Variable    ${MAX_ALLOWED_STALE_INSTANCES}    ${MAX_ALLOWED_STALE_INSTANCES}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}

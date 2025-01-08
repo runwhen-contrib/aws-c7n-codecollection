@@ -40,7 +40,7 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
         ${ec2_instances_list}=    Create List
     END
 
-    IF    len(@{ec2_instances_list}) > 0
+    IF    len(@{ec2_instances_list}) > int(${MAX_ALLOWED_STALE_INSTANCES})
         # Generate and format report 
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["InstanceId", "InstanceType", "ImageId", "REGION", "Tags"], (.[] | [ .InstanceId, .InstanceType, .ImageId, $region, (.Tags | map(.Key + "=" + .Value) | join(","))]) | @tsv' ${OUTPUT_DIR}/aws-c7n-ec2-health/stale-ec2-instances/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
@@ -48,14 +48,15 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
 
         # Loop through each EC2 instance in the list
         FOR    ${item}    IN    @{ec2_instances_list}
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
             RW.Core.Add Issue        
             ...    severity=3
             ...    actual=EC2 instance in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be stale for more than `${AWS_EC2_AGE}` days
             ...    expected=EC2 instance `${item["InstanceId"]}` has been stale for more than `${AWS_EC2_AGE}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    title=Stale EC2 instance `${item["InstanceId"]}` found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${item}
-            ...    next_steps=Review stale EC2 Instances to assess potential security risks in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete stale AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
+            ...    details=${pretty_item}
+            ...    next_steps=Patch and restart EC2 instances in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`\nDelete stale AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
 
@@ -86,7 +87,7 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
         ${ec2_instances_list}=    Create List
     END
 
-    IF    len(@{ec2_instances_list}) > 0
+    IF    len(@{ec2_instances_list}) > int(${MAX_ALLOWED_STOPPED_INSTANCES})
         # Generate and format report 
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["InstanceId", "InstanceType", "ImageId","REGION", "Tags"], (.[] | [ .InstanceId, .InstanceType, .ImageId, $region, (.Tags | map(.Key + "=" + .Value) | join(","))]) | @tsv' ${OUTPUT_DIR}/aws-c7n-ec2-health/stopped-ec2-instances/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
@@ -94,13 +95,14 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
 
         # Loop through each EC2 instance in the list
         FOR    ${item}    IN    @{ec2_instances_list}
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
             RW.Core.Add Issue        
             ...    severity=4
             ...    expected=EC2 instance in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be stopped for more than `${AWS_EC2_AGE}` days
             ...    actual=EC2 instance `${item["InstanceId"]}` has been stopped for more than `${AWS_EC2_AGE}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    title=Stopped EC2 instance `${item["InstanceId"]}` found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${item}
+            ...    details=${pretty_item}
             ...    next_steps=Delete stopped AWS EC2 instance in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
         END
     END
@@ -123,23 +125,36 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Access Key Secret
     ...    pattern=\w*
+    ${MAX_ALLOWED_STOPPED_INSTANCES}=    RW.Core.Import User Variable    MAX_ALLOWED_STOPPED_INSTANCES
+    ...    type=string
+    ...    description=The maxiumum number of stopped EC2 instances to allow.
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
+    ${MAX_ALLOWED_STALE_INSTANCES}=    RW.Core.Import User Variable    MAX_ALLOWED_STALE_INSTANCES
+    ...    type=string
+    ...    description=The maxiumum number of stale EC2 instances to allow.
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
     ${AWS_EC2_AGE}=    RW.Core.Import User Variable    AWS_EC2_AGE
     ...    type=string
     ...    description=The age (in days) for EC2 instances to be considered stale.
     ...    pattern=^\d+$
     ...    example=60
-    ...    default=60
+    ...    default="60"
     ${AWS_EC2_TAGS}=    RW.Core.Import User Variable    AWS_EC2_TAGS
     ...    type=string
-    ...    description=Comma-separated list of tags to filter AWS EC2 instances.
+    ...    description=Comma separated list of tags to filter AWS EC2 instances.
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=Name,Environment
-    ...    default=
-    ${aws_account_name_query}=       RW.CLI.Run Cli    
-    ...    cmd=aws organizations describe-account --account-id $(aws sts get-caller-identity --query 'Account' --output text) --query "Account.Name" --output text | tr -d '\n'
+    ...    default=""
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ec2-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     Set Suite Variable    ${AWS_EC2_AGE}    ${AWS_EC2_AGE}
     Set Suite Variable    ${AWS_EC2_TAGS}    ${AWS_EC2_TAGS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
-    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${aws_account_name_query.stdout}
+    Set Suite Variable    ${MAX_ALLOWED_STOPPED_INSTANCES}    ${MAX_ALLOWED_STOPPED_INSTANCES}
+    Set Suite Variable    ${MAX_ALLOWED_STALE_INSTANCES}    ${MAX_ALLOWED_STALE_INSTANCES}
+    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
+    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
