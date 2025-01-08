@@ -2,8 +2,8 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS network health
-Documentation        Count publicly accessible security groups, unused EIPs, and ELBs.
-Force Tags    Tag    AWS    security-group    elb    eip    network        
+Documentation        Count publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled
+Force Tags    Tag    AWS    security-group    elb    eip    network    vpc        
 
 Library    RW.Core
 Library    RW.CLI
@@ -62,8 +62,24 @@ Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
     ${unused_elb_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unused_elb_score}
 
+Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find VPCs that do not have Flow Logs enabled
+    [Tags]    aws    vpc    network 
+    ${total_count}=    Set Variable    0
+    FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
+        ${c7n_output}=    RW.CLI.Run Cli
+        ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/flow-log-disabled-vpc.yaml --cache-period 0
+        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+        ${count}=     RW.CLI.Run Cli
+        ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/flow-log-disabled-vpc/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+        ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
+    END
+    ${flow_log_disabled_vpc_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
+    Set Global Variable    ${flow_log_disabled_vpc_score}
+
 Generate Health Score
-    ${health_score}=      Evaluate  (${public_ip_access_score} + ${unattached_eip_score} + ${unused_elb_score}) / 3
+    ${health_score}=      Evaluate  (${public_ip_access_score} + ${unattached_eip_score} + ${unused_elb_score} + ${flow_log_disabled_vpc_score}) / 4
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
 
