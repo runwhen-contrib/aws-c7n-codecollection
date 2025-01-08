@@ -2,8 +2,8 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS network health
-Documentation        List publicly accessible security groups, unused EIPs, and ELBs.
-Force Tags    Tag    AWS    security-group    network    elb    eip
+Documentation        List publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled
+Force Tags    Tag    AWS    security-group    network    elb    eip    vpc
 
 Library    RW.Core
 Library    RW.CLI
@@ -130,6 +130,45 @@ List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
                 ...    details=${pretty_item}
                 ...    next_steps=Delete the unused ELB in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
 
+            END
+        END
+    END
+
+List VPCs with Flow Logs Disabled in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find VPCs that do not have flow logs enabled
+    [Tags]    aws    vpc    network 
+    FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
+        ${c7n_output}=    RW.CLI.Run Cli
+        ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/flow-log-disabled-vpc.yaml --cache-period 0
+        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+
+        ${report_data}=     RW.CLI.Run Cli
+        ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/flow-log-disabled-vpc/resources.json 
+
+        TRY
+            ${resource_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
+        EXCEPT
+            Log    Failed to load JSON payload, defaulting to empty list.    WARN
+            ${resource_list}=    Create List
+        END
+
+        IF    len(@{resource_list}) > 0
+            # Generate and format report
+            ${formatted_results}=    RW.CLI.Run Cli
+            ...    cmd=jq -r --arg region "${region}" '["VPC-ID", "State", "CidrBlock", "Region"], (.[] | [ .VpcId, .State, .CidrBlock, $region ]) | @tsv' ${OUTPUT_DIR}/${region}/aws-c7n-network-health/flow-log-disabled-vpc/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
+            RW.Core.Add Pre To Report    ${formatted_results.stdout}
+
+            FOR    ${item}    IN    @{resource_list}
+                ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
+                RW.Core.Add Issue        
+                ...    severity=4
+                ...    expected=VPC `${item['VpcId']}` in AWS Region `${region}` in AWS Account `${AWS_ACCOUNT_ID}` should have flow logs enabled
+                ...    actual=VPC `${item['VpcId']}` in AWS Region `${region}` in AWS Account `${AWS_ACCOUNT_ID}` does not have flow logs enabled
+                ...    title=Flow logs disabled for VPC `${item['VpcId']}` in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
+                ...    reproduce_hint=${c7n_output.cmd}
+                ...    details=${pretty_item}
+                ...    next_steps=Enable flow logs for VPC in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
             END
         END
     END
