@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Score Network Health (1 = Healthy, 0 = Unhealty) by identifying publicly accessible security groups, unused EIPs, and ELBs in AWS account {{match_resource.resource.account_id}}
+  description: Score Network Health (1 = Healthy, 0 = Unhealty) by identifying publicly accessible security groups, unused Elastic IPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}

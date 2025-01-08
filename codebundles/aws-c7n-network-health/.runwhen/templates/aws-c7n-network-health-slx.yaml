@@ -9,13 +9,13 @@ metadata:
 spec:
   imageURL: https://PLACEHOLDER.png
   alias: AWS Network Health For AWS Account {{match_resource.resource.account_id}}
-  asMeasuredBy: The number of publicly accessible security groups, unused EIPs, and ELBs in AWS account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
   owners:
   - {{workspace.owner_email}}
-  statement: Identify publicly accessible security groups, unused EIPs, and ELBs in the AWS account {{match_resource.resource.account_id}}
+  statement: Identify publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in the AWS account {{match_resource.resource.account_id}}
   additionalContext:
     region: "{{match_resource.resource.region}}"
     account_id: "{{match_resource.resource.account_id}}"
