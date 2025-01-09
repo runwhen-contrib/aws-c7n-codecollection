@@ -87,7 +87,7 @@ List unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
                 ...    title=Unused Elastic IP `${item['PublicIp']}` detected in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                 ...    reproduce_hint=${c7n_output.cmd}
                 ...    details=${pretty_item}
-                ...    next_steps=Release the unused Elastic IP in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
+                ...    next_steps=Release unused Elastic IPs in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
 
             END
         END
@@ -128,7 +128,7 @@ List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
                 ...    title=Unused ELB detected in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                 ...    reproduce_hint=${c7n_output.cmd}
                 ...    details=${pretty_item}
-                ...    next_steps=Delete the unused ELB in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
+                ...    next_steps=Delete unused ELBs in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
 
             END
         END
@@ -168,7 +168,7 @@ List VPCs with Flow Logs Disabled in AWS account `${AWS_ACCOUNT_ID}`
                 ...    title=Flow logs disabled for VPC `${item['VpcId']}` in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                 ...    reproduce_hint=${c7n_output.cmd}
                 ...    details=${pretty_item}
-                ...    next_steps=Enable flow logs for VPC in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
+                ...    next_steps=Enable VPC Flow Logs in AWS region \`${region}\` and AWS account \`${AWS_ACCOUNT_ID}\`
             END
         END
     END
