@@ -16,6 +16,9 @@ Suite Setup    Suite Initialization
 Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
     [Tags]    aws    security-group    network
+    CloudCustodian.Core.Generate Policy   
+    ...    ${CURDIR}/insecure-sg-ingress.j2    
+    ...    tags=${AWS_SG_TAGS}
     ${total_count}=    Set Variable    0
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
@@ -65,6 +68,9 @@ Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
 Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find VPCs that do not have Flow Logs enabled
     [Tags]    aws    vpc    network 
+    CloudCustodian.Core.Generate Policy   
+    ...    ${CURDIR}/flow-log-disabled-vpc.j2    
+    ...    tags=${AWS_VPC_TAGS}
     ${total_count}=    Set Variable    0
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
@@ -107,6 +113,18 @@ Suite Initialization
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
+    ${AWS_SG_TAGS}=    RW.Core.Import User Variable  AWS_SG_TAGS
+    ...    type=string
+    ...    description=Comma separated list of tag keys to exclude security groups from filtering. 
+    ...    pattern=^[a-zA-Z0-9,]+$
+    ...    example=Name,Environment
+    ...    default=""
+    ${AWS_VPC_TAGS}=    RW.Core.Import User Variable  AWS_VPC_TAGS
+    ...    type=string
+    ...    description=comma separated list of tag keys to filter VPCs. 
+    ...    pattern=^[a-zA-Z0-9,]+$
+    ...    example=Name,Environment
+    ...    default=""
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-network-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
     ...    cmd=aws ec2 describe-regions --region ${AWS_REGION} --query 'Regions[*].RegionName' --output json
@@ -115,6 +133,8 @@ Suite Initialization
     ${AWS_ENABLED_REGIONS}=    Evaluate    json.loads(r'''${AWS_ENABLED_REGIONS.stdout}''')    json
     Set Suite Variable    ${AWS_ENABLED_REGIONS}    ${AWS_ENABLED_REGIONS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
+    Set Suite Variable    ${AWS_SG_TAGS}    ${AWS_SG_TAGS}
+    Set Suite Variable    ${AWS_VPC_TAGS}    ${AWS_VPC_TAGS}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
