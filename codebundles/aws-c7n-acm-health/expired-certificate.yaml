@@ -1,0 +1,9 @@
+policies:
+  - name: expired-certificate
+    resource: acm-certificate
+    filters:
+      - type: value
+        key: NotAfter
+        value_type: expiration
+        op: lt
+        value: 0
