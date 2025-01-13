@@ -150,7 +150,7 @@ List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account 
                     ...    title=Invalid Auto Scaling Group found ${asg_name} in AWS Region ${AWS_REGION} in AWS Account ${AWS_ACCOUNT_ID}
                     ...    reproduce_hint=${c7n_output.cmd}
                     ...    details=Auto Scaling Group: ${asg_name}\n${human_friendly_key}: ${invalid_value}
-                    ...    next_steps=Review and Validate Auto Scaling Group in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
+                    ...    next_steps=Validate Auto Scaling Group in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\`
                 END
             ELSE
                 Log    No invalid configurations found for ${asg_name}.
