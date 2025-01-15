@@ -156,10 +156,9 @@ List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account 
         FOR    ${asg}    IN    @{asg_list}
             ${asg_name}=    Set Variable    ${asg["AutoScalingGroupName"]}
             ${invalid_items}=    Evaluate    ${asg}.get("Invalid", [])
-            IF    $invalid_items
-                Log    "True"
+            IF    ${invalid_items} == True
                 RW.Core.Add Issue
-                ...    severity=3
+                ...    severity=2
                 ...    actual=Auto Scaling Group ${asg_name} in AWS Region ${AWS_REGION} in AWS Account ${AWS_ACCOUNT_ID} is invalid
                 ...    expected=Auto Scaling Group ${asg_name} should be valid in AWS Region ${AWS_REGION} in AWS Account ${AWS_ACCOUNT_ID}
                 ...    title=Invalid Auto Scaling Group configuration for \`${asg_name}\` in AWS Region \`${AWS_REGION}\` in AWS Account \`${AWS_ACCOUNT_ID}\`
@@ -174,13 +173,13 @@ List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account 
                         ${human_friendly_key}=    Evaluate    '${invalid_key}'.replace("-", " ")
                         ${invalid_value}=    Set Variable    ${invalid_entry[1]}
                         RW.Core.Add Issue
-                        ...    severity=3
+                        ...    severity=2
                         ...    actual=Auto Scaling Group ${asg_name} in AWS Region ${AWS_REGION} in AWS Account ${AWS_ACCOUNT_ID} has ${human_friendly_key}
                         ...    expected=Auto Scaling Group ${asg_name} should not have ${human_friendly_key} in AWS Region ${AWS_REGION} in AWS Account ${AWS_ACCOUNT_ID}
-                        ...    title=Invalid `\${human_friendly_key}\` Auto Scaling Group configuration for \`${asg_name}\` in AWS Region \`${AWS_REGION}\` in AWS Account \`${AWS_ACCOUNT_ID}\`
+                        ...    title=Found ${human_friendly_key} in Auto Scaling Group \`${asg_name}\` in AWS Region \`${AWS_REGION}\` in AWS Account \`${AWS_ACCOUNT_ID}\`
                         ...    reproduce_hint=${c7n_output.cmd}
-                        ...    details=Auto Scaling Group: ${asg_name}\n${human_friendly_key}: ${invalid_value}
-                        ...    next_steps=Escalate invalid Auto Scaling Group \`${asg_name}\` configuration in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\` to service owner
+                        ...    details=Auto Scaling Group: ${asg_name}\n- ${human_friendly_key}: ${invalid_value}
+                        ...    next_steps=Fix ${human_friendly_key} Auto Scaling Group \`${asg_name}\` configuration in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\` to service owner
                     END
                 ELSE
                     RW.Core.Add Pre To Report    No invalid configurations found for ${asg_name}.
