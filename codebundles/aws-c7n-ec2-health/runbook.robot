@@ -179,7 +179,7 @@ List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account 
                         ...    title=Found ${human_friendly_key} in Auto Scaling Group \`${asg_name}\` in AWS Region \`${AWS_REGION}\` in AWS Account \`${AWS_ACCOUNT_ID}\`
                         ...    reproduce_hint=${c7n_output.cmd}
                         ...    details=Auto Scaling Group: ${asg_name}\n- ${human_friendly_key}: ${invalid_value}
-                        ...    next_steps=Fix ${human_friendly_key} Auto Scaling Group \`${asg_name}\` configuration in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\` to service owner
+                        ...    next_steps=Fix ${human_friendly_key} in Auto Scaling Group \`${asg_name}\` configuration in AWS Region \`${AWS_REGION}\` in AWS account \`${AWS_ACCOUNT_ID}\` to service owner
                     END
                 ELSE
                     RW.Core.Add Pre To Report    No invalid configurations found for ${asg_name}.
