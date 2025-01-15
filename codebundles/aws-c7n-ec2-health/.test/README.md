@@ -110,3 +110,9 @@ To test an Invalid Auto Scaling Group (ASG) task, manually delete EC2 Key Pair.
 	```
 	aws ec2 delete-key-pair --key-name my-ec2-key --region us-west-2
 	```
+or a Laumnch Template
+
+	```
+	template_id=$(cd terraform && terraform show -json terraform.tfstate | jq -r  '.values.root_module.resources[] | select(.type == "aws_autoscaling_group") | .values.launch_template[0].id')
+	aws ec2 delete-launch-template --launch-template-id $template_id --region us-west-2
+	```

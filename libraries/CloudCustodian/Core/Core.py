@@ -41,6 +41,27 @@ def process_ec2_resource(resource, subdir_name, resource_summary):
         tags_str
     ])
 
+def process_asg_resource(resource, subdir_name, resource_summary):
+    asg_name = resource.get("AutoScalingGroupName", "Unknown ASG Name")
+    arn = resource.get("AutoScalingGroupARN", "Unknown ARN")
+    min_size = resource.get("MinSize", "Unknown Min Size")
+    max_size = resource.get("MaxSize", "Unknown Max Size")
+    desired_capacity = resource.get("DesiredCapacity", "Unknown Desired Capacity")
+    availability_zones = ", ".join(resource.get("AvailabilityZones", []))
+    tags = resource.get("Tags", [])
+    tags_str = ", ".join(f"{tag.get('Key', 'Unknown')}={tag.get('Value', 'Unknown')}" for tag in tags)
+
+    resource_summary.append([
+        subdir_name,
+        asg_name,
+        arn,
+        min_size,
+        max_size,
+        desired_capacity,
+        availability_zones,
+        tags_str
+    ])
+
 def parse_custodian_results(input_dir: str):
     """
     Parses Cloud Custodian results and summarizes resources, metadata, and run health.
@@ -79,6 +100,8 @@ def parse_custodian_results(input_dir: str):
                         resource_type = resource.get("c7n:resource-type", "Unknown")
                         if resource_type == "ec2" or resource.get("InstanceId"):
                             process_ec2_resource(resource, subdir_name, resource_summary)
+                        elif resource_type == "asg" or resource.get("AutoScalingGroupName"):
+                            process_asg_resource(resource, subdir_name, resource_summary)
                         else:
                             # Fallback for other resource types
                             resource_name = resource.get("Name", "Unknown Name")
