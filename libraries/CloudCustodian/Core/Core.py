@@ -22,8 +22,45 @@ def parse_resource_type_from_arn(arn):
         print(f"Error parsing ARN: {e}")
     
     return "Unknown Type"
+def process_ec2_resource(resource, subdir_name, resource_summary):
+    instance_id = resource.get("InstanceId", "Unknown Instance ID")
+    instance_type = resource.get("InstanceType", "Unknown Instance Type")
+    state = resource.get("State", {}).get("Name", "Unknown State")
+    availability_zone = resource.get("Placement", {}).get("AvailabilityZone", "Unknown AZ")
+    private_ip = resource.get("PrivateIpAddress", "Unknown Private IP")
+    tags = resource.get("Tags", [])
+    tags_str = ", ".join(f"{tag.get('Key', 'Unknown')}={tag.get('Value', 'Unknown')}" for tag in tags)
 
+    resource_summary.append([
+        subdir_name,
+        instance_id,
+        instance_type,
+        state,
+        availability_zone,
+        private_ip,
+        tags_str
+    ])
 
+def process_asg_resource(resource, subdir_name, resource_summary):
+    asg_name = resource.get("AutoScalingGroupName", "Unknown ASG Name")
+    arn = resource.get("AutoScalingGroupARN", "Unknown ARN")
+    min_size = resource.get("MinSize", "Unknown Min Size")
+    max_size = resource.get("MaxSize", "Unknown Max Size")
+    desired_capacity = resource.get("DesiredCapacity", "Unknown Desired Capacity")
+    availability_zones = ", ".join(resource.get("AvailabilityZones", []))
+    tags = resource.get("Tags", [])
+    tags_str = ", ".join(f"{tag.get('Key', 'Unknown')}={tag.get('Value', 'Unknown')}" for tag in tags)
+
+    resource_summary.append([
+        subdir_name,
+        asg_name,
+        arn,
+        min_size,
+        max_size,
+        desired_capacity,
+        availability_zones,
+        tags_str
+    ])
 
 def parse_custodian_results(input_dir: str):
     """
@@ -45,105 +82,93 @@ def parse_custodian_results(input_dir: str):
     policy_summary = []
     log_summary = []
 
-    # Recursively traverse subdirectories
-    for subdir in input_path.iterdir():
-        if subdir.is_dir():
-            resources_file = subdir / "resources.json"
-            metadata_file = subdir / "metadata.json"
-            log_file = subdir / "custodian-run.log"
+    def process_files(resources_file, metadata_file, log_file, subdir_name):
+        # Parse resources.json
+        if resources_file.exists():
+            try:
+                with open(resources_file, "r") as f:
+                    resources = json.load(f)
+                    if not isinstance(resources, list):
+                        print(f"Skipping {resources_file}: Expected a list of resources.")
+                        return
 
-            # Parse resources.json
-            if resources_file.exists():
-                try:
-                    with open(resources_file, "r") as f:
-                        resources = json.load(f)
-                        if not isinstance(resources, list):
-                            print(f"Skipping {resources_file}: Expected a list of resources.")
+                    for resource in resources:
+                        if not isinstance(resource, dict):
+                            print(f"Skipping malformed resource in {resources_file}: {resource}")
                             continue
 
-                        for resource in resources:
-                            if not isinstance(resource, dict):
-                                print(f"Skipping malformed resource in {resources_file}: {resource}")
-                                continue
-
-                            # Resource attributes
+                        resource_type = resource.get("c7n:resource-type", "Unknown")
+                        if resource_type == "ec2" or resource.get("InstanceId"):
+                            process_ec2_resource(resource, subdir_name, resource_summary)
+                        elif resource_type == "asg" or resource.get("AutoScalingGroupName"):
+                            process_asg_resource(resource, subdir_name, resource_summary)
+                        else:
+                            # Fallback for other resource types
                             resource_name = resource.get("Name", "Unknown Name")
-
-                            # Extract the ARN
-                            policy_raw = resource.get("Policy", None)
-                            if isinstance(policy_raw, str):
-                                try:
-                                    policy = json.loads(policy_raw)
-                                    arn = policy.get("Statement", [])[0].get("Resource", "Unknown ARN")
-                                except json.JSONDecodeError:
-                                    arn = "Unknown ARN (Invalid Policy)"
-                            else:
-                                arn = "Unknown ARN"
-
-                            # Use the fixed ARN parsing function
-                            resource_type = parse_resource_type_from_arn(arn)
                             resource_location = resource.get("Location", {}).get("LocationConstraint", "Unknown Location")
-
-                            # Tags
-                            tags = resource.get("Tags", [])
-                            if isinstance(tags, list):
-                                tags_str = ", ".join(f"{tag.get('Key', 'Unknown')}={tag.get('Value', 'Unknown')}" for tag in tags)
-                            else:
-                                tags_str = "Unknown Tags"
-
-                            # Public Access Block
-                            public_access_block = resource.get("c7n:PublicAccessBlock", {})
-                            public_access = public_access_block.get("BlockPublicPolicy", "Unknown")
-
-                            # Append to resource summary
                             resource_summary.append([
-                                subdir.name,  # Policy name
+                                subdir_name,
                                 resource_name,
                                 resource_type,
                                 resource_location,
-                                tags_str,
-                                public_access
+                                "N/A",
+                                "N/A"
                             ])
-                except json.JSONDecodeError:
-                    print(f"Error reading resources.json in {subdir}: Invalid JSON format.")
-                except Exception as e:
-                    print(f"Error reading resources.json in {subdir}: {e}")
+            except json.JSONDecodeError:
+                print(f"Error reading resources.json in {subdir_name}: Invalid JSON format.")
+            except Exception as e:
+                print(f"Error reading resources.json in {subdir_name}: {e}")
 
+        # Parse metadata.json
+        if metadata_file.exists():
+            try:
+                with open(metadata_file, "r") as f:
+                    metadata = json.load(f)
+                    policy = metadata.get("policy", {})
+                    policy_name = policy.get("name", "Unknown Policy")
 
-                    
-            # Parse metadata.json
-            if metadata_file.exists():
-                try:
-                    with open(metadata_file, "r") as f:
-                        metadata = json.load(f)
-                        policy = metadata.get("policy", {})
-                        policy_name = policy.get("name", "Unknown Policy")
-                        
-                        # Extract metrics timestamps for start and end time
-                        metrics = metadata.get("metrics", [])
-                        if metrics:
-                            timestamps = [m.get("Timestamp") for m in metrics if m.get("Timestamp")]
-                            start_time = min(timestamps) if timestamps else "Unknown Start Time"
-                            end_time = max(timestamps) if timestamps else "Unknown End Time"
-                        else:
-                            start_time = "Unknown Start Time"
-                            end_time = "Unknown End Time"
+                    # Extract metrics timestamps for start and end time
+                    metrics = metadata.get("metrics", [])
+                    if metrics:
+                        timestamps = [m.get("Timestamp") for m in metrics if m.get("Timestamp")]
+                        start_time = min(timestamps) if timestamps else "Unknown Start Time"
+                        end_time = max(timestamps) if timestamps else "Unknown End Time"
+                    else:
+                        start_time = "Unknown Start Time"
+                        end_time = "Unknown End Time"
 
-                        # Add to policy summary
-                        policy_summary.append([policy_name, start_time, end_time])
-                except Exception as e:
-                    print(f"Error reading metadata.json in {subdir}: {e}")
+                    # Add to policy summary
+                    policy_summary.append([policy_name, start_time, end_time])
+            except Exception as e:
+                print(f"Error reading metadata.json in {subdir_name}: {e}")
 
-            # Parse custodian-run.log
-            if log_file.exists():
-                try:
-                    with open(log_file, "r") as f:
-                        logs = f.readlines()
-                        error_count = sum(1 for line in logs if "ERROR" in line)
-                        warning_count = sum(1 for line in logs if "WARNING" in line)
-                        log_summary.append([subdir.name, error_count, warning_count])
-                except Exception as e:
-                    print(f"Error reading custodian-run.log in {subdir}: {e}")
+        # Parse custodian-run.log
+        if log_file.exists():
+            try:
+                with open(log_file, "r") as f:
+                    logs = f.readlines()
+                    error_count = sum(1 for line in logs if "ERROR" in line)
+                    warning_count = sum(1 for line in logs if "WARNING" in line)
+                    log_summary.append([subdir_name, error_count, warning_count])
+            except Exception as e:
+                print(f"Error reading custodian-run.log in {subdir_name}: {e}")
+
+    # Check for subdirectories or direct files
+    subdirs = [d for d in input_path.iterdir() if d.is_dir()]
+    if not subdirs:
+        # No subdirectories, use current folder name as subdir
+        current_folder_name = input_path.name
+        resources_file = input_path / "resources.json"
+        metadata_file = input_path / "metadata.json"
+        log_file = input_path / "custodian-run.log"
+        process_files(resources_file, metadata_file, log_file, current_folder_name)
+    else:
+        # Process each subdirectory
+        for subdir in subdirs:
+            resources_file = subdir / "resources.json"
+            metadata_file = subdir / "metadata.json"
+            log_file = subdir / "custodian-run.log"
+            process_files(resources_file, metadata_file, log_file, subdir.name)
 
     # Generate combined summary
     results = []
@@ -151,7 +176,7 @@ def parse_custodian_results(input_dir: str):
     if resource_summary:
         results.append("Resource Summary:")
         results.append(tabulate(resource_summary, headers=[
-            "Policy Name", "Resource Name", "Resource Type", "Location", "Tags", "Public Access Blocked"
+            "Policy Name", "Resource ID", "Resource Type", "State", "Availability Zone", "Private IP", "Tags"
         ], tablefmt="grid"))
 
     if policy_summary:
