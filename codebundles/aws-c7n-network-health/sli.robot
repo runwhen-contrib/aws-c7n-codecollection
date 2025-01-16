@@ -18,7 +18,7 @@ Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     [Tags]    aws    security-group    network
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/insecure-sg-ingress.j2    
-    ...    tags=${AWS_SG_TAGS}
+    ...    tags=${AWS_SECURITY_GROUP_TAGS}
     ${total_count}=    Set Variable    0
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
@@ -29,7 +29,7 @@ Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/insecure-sg-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
     END
-    ${public_ip_access_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
+    ${public_ip_access_score}=    Evaluate    1 if ${total_count} <= int(${UNSECURED_SG_THRESHOLD}) else 0
     Set Global Variable    ${public_ip_access_score}
 
 
@@ -46,7 +46,7 @@ Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-eip/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
     END
-    ${unattached_eip_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
+    ${unattached_eip_score}=    Evaluate    1 if ${total_count} <= int(${MAX_ALLOWED_UNUSED_RESOURCES}) else 0
     Set Global Variable    ${unattached_eip_score}
 
 Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
@@ -62,7 +62,7 @@ Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-elb/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
     END
-    ${unused_elb_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
+    ${unused_elb_score}=    Evaluate    1 if ${total_count} <= int(${MAX_ALLOWED_UNUSED_RESOURCES}) else 0
     Set Global Variable    ${unused_elb_score}
 
 Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
@@ -81,7 +81,7 @@ Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/flow-log-disabled-vpc/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
     END
-    ${flow_log_disabled_vpc_score}=    Evaluate    1 if ${total_count} <= int(${EVENT_THRESHOLD}) else 0
+    ${flow_log_disabled_vpc_score}=    Evaluate    1 if ${total_count} <= int(${DISABLED_FLOW_LOG_THRESHOLD}) else 0
     Set Global Variable    ${flow_log_disabled_vpc_score}
 
 Generate Health Score
@@ -107,24 +107,36 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Access Key Secret
     ...    pattern=\w*
-    ${EVENT_THRESHOLD}=    RW.Core.Import User Variable    EVENT_THRESHOLD
+    ${UNSECURED_SG_THRESHOLD}=    RW.Core.Import User Variable    UNSECURED_SG_THRESHOLD
     ...    type=string
-    ...    description=The minimum number of network resources to consider unsecured
+    ...    description=The number of publicly accessible security groups allowed
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
-    ${AWS_SG_TAGS}=    RW.Core.Import User Variable  AWS_SG_TAGS
+    ${MAX_ALLOWED_UNUSED_RESOURCES}=    RW.Core.Import User Variable    MAX_ALLOWED_UNUSED_RESOURCES
     ...    type=string
-    ...    description=Comma separated list of tag keys to exclude security groups from filtering. 
+    ...    description=The maximum number of unused network resources allowed
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
+    ${DISABLED_FLOW_LOG_THRESHOLD}=    RW.Core.Import User Variable    DISABLED_FLOW_LOG_THRESHOLD
+    ...    type=string
+    ...    description=The number of VPCs to consider as having flow logs disabled
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
+    ${AWS_SECURITY_GROUP_TAGS}=    RW.Core.Import User Variable  AWS_SECURITY_GROUP_TAGS
+    ...    type=string
+    ...    description=Comma separated list of tags (with only Key or both Key=Value) to exclude security groups from filtering. 
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
+    ...    example="Name,Environment=prod"
     ...    default=""
     ${AWS_VPC_TAGS}=    RW.Core.Import User Variable  AWS_VPC_TAGS
     ...    type=string
-    ...    description=comma separated list of tag keys to filter VPCs. 
+    ...    description=Comma separated list of tags (with only Key or both Key=Value) to include VPCs. Only VPCs with these tags will be filtered.
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
-    ...    default=""
+    ...    example="Name,Environment=prod"
+    ...    default="Name"
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-network-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
     ...    cmd=aws ec2 describe-regions --region ${AWS_REGION} --query 'Regions[*].RegionName' --output json
@@ -133,9 +145,11 @@ Suite Initialization
     ${AWS_ENABLED_REGIONS}=    Evaluate    json.loads(r'''${AWS_ENABLED_REGIONS.stdout}''')    json
     Set Suite Variable    ${AWS_ENABLED_REGIONS}    ${AWS_ENABLED_REGIONS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
-    Set Suite Variable    ${AWS_SG_TAGS}    ${AWS_SG_TAGS}
+    Set Suite Variable    ${AWS_SECURITY_GROUP_TAGS}    ${AWS_SECURITY_GROUP_TAGS}
     Set Suite Variable    ${AWS_VPC_TAGS}    ${AWS_VPC_TAGS}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
-    Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
+    Set Suite Variable    ${UNSECURED_SG_THRESHOLD}    ${UNSECURED_SG_THRESHOLD}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${DISABLED_FLOW_LOG_THRESHOLD}    ${DISABLED_FLOW_LOG_THRESHOLD}
+    Set Suite Variable    ${MAX_ALLOWED_UNUSED_RESOURCES}    ${MAX_ALLOWED_UNUSED_RESOURCES}
