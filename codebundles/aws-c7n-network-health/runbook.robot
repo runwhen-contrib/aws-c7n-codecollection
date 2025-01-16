@@ -18,7 +18,7 @@ List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_ID}`
     [Tags]    tag    aws    security-group    network 
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/insecure-sg-ingress.j2    
-    ...    tags=${AWS_SG_TAGS}
+    ...    tags=${AWS_SECURITY_GROUP_TAGS}
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/insecure-sg-ingress.yaml --cache-period 0
@@ -197,18 +197,18 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Access Key Secret
     ...    pattern=\w*
-    ${AWS_SG_TAGS}=    RW.Core.Import User Variable  AWS_SG_TAGS
+    ${AWS_SECURITY_GROUP_TAGS}=    RW.Core.Import User Variable  AWS_SECURITY_GROUP_TAGS
     ...    type=string
-    ...    description=Comma separated list of tag keys to exclude security groups from filtering. 
+    ...    description=Comma separated list of tags (with only Key or both Key=Value) to exclude security groups from filtering. 
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
+    ...    example="Name,Environment=prod"
     ...    default=""
     ${AWS_VPC_TAGS}=    RW.Core.Import User Variable  AWS_VPC_TAGS
     ...    type=string
-    ...    description=comma separated list of tag keys to filter VPCs. 
+    ...    description=Comma separated list of tags (with only Key or both Key=Value) to include VPCs. Only VPCs with these tags will be filtered.
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
-    ...    default=""
+    ...    example="Name,Environment=prod"
+    ...    default="Name"
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-network-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
     ...    cmd=aws ec2 describe-regions --region ${AWS_REGION} --query 'Regions[*].RegionName' --output json
@@ -217,7 +217,7 @@ Suite Initialization
     ${AWS_ENABLED_REGIONS}=    Evaluate    json.loads(r'''${AWS_ENABLED_REGIONS.stdout}''')    json
     Set Suite Variable    ${AWS_ENABLED_REGIONS}    ${AWS_ENABLED_REGIONS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
-    Set Suite Variable    ${AWS_SG_TAGS}    ${AWS_SG_TAGS}
+    Set Suite Variable    ${AWS_SECURITY_GROUP_TAGS}    ${AWS_SECURITY_GROUP_TAGS}
     Set Suite Variable    ${AWS_VPC_TAGS}    ${AWS_VPC_TAGS}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
