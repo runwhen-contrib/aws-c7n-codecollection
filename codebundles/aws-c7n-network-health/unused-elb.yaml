@@ -1,0 +1,9 @@
+policies:
+- name: unused-elb
+  resource: app-elb
+  description: |
+    This policy identifies unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets.
+  filters:
+    - type: target-group
+      key: target_group_arn
+      value: null

@@ -351,7 +351,7 @@ def generate_policy(template_path, **kargs):
     jinja_env       = Environment(loader=FileSystemLoader(template_dir))
 
     if "tags" in kargs and kargs["tags"] not in (None, "", "''", '""'):
-        kargs["tags"] = kargs["tags"].replace(" ","").split(",")
+        kargs["tags"] = kargs["tags"].strip('"').strip("'").replace(" ","").split(",")
     else:
         kargs["tags"] = []
     try:
