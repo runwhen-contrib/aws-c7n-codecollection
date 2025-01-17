@@ -1,0 +1,5 @@
+policies:
+  - name: invalid-asg
+    resource: asg
+    filters:
+      - invalid

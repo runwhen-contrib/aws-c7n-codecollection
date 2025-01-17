@@ -37,6 +37,62 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+resource "aws_subnet" "public_subnet" {
+  vpc_id            = aws_vpc.new_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-west-2a"
+
+  tags = {
+    Name = "public-subnet"
+  }
+}
+
+resource "aws_subnet" "public_subnet_2" {
+  vpc_id            = aws_vpc.new_vpc.id
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "us-west-2b"
+
+  tags = {
+    Name = "public-subnet"
+  }
+}
+
+# Create an Internet Gateway
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.new_vpc.id
+
+  tags = {
+    Name = "example-igw"
+  }
+}
+
+# Add a Route to the Internet Gateway
+resource "aws_route" "internet_access" {
+  route_table_id         = aws_route_table.public_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
+
+# Associate the Route Table with Public Subnets
+resource "aws_route_table_association" "public_subnet" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+resource "aws_route_table_association" "public_subnet_2" {
+  subnet_id      = aws_subnet.public_subnet_2.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# Create a Route Table
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.new_vpc.id
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
 # Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
@@ -71,6 +127,47 @@ resource "aws_security_group" "instance_sg" {
   tags = {
     Name = "test-instance-sg"
   }
+}
+
+resource "aws_launch_template" "example" {
+  name          = "example-launch-template"
+  image_id      = data.aws_ami.amazon_linux_2.id
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.my_ec2_key.key_name
+  network_interfaces {
+    subnet_id = aws_subnet.private_subnet.id
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "example-asg-instance"
+    }
+  }
+}
+
+# Create an Auto Scaling Group
+resource "aws_autoscaling_group" "example" {
+  name                = "example-asg"
+  max_size            = 1
+  min_size            = 1
+  desired_capacity    = 1
+  vpc_zone_identifier = [aws_subnet.private_subnet.id]
+  launch_template {
+    id      = aws_launch_template.example.id
+    version = "$Latest"
+  }
+
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
+
+  tag {
+    key                 = "Name"
+    value               = "example-asg-instance"
+    propagate_at_launch = true
+  }
+
 }
 
 # EC2 Instance
@@ -116,4 +213,8 @@ output "private_key" {
 
 output "public_key" {
   value = tls_private_key.ssh_key.public_key_openssh
+}
+
+output "launch_template" {
+  value = aws_autoscaling_group.example.launch_configuration
 }

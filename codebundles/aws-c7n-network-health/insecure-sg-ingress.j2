@@ -1,0 +1,27 @@
+policies:
+  - name: insecure-sg-ingress
+    resource: security-group
+    description: |
+      Detect any rule from a security group that allows 0.0.0.0/0 or ::/0 (IPv6) ingress.
+      Security groups with specific tags will be excluded.
+    filters:
+      - or:
+          - type: ingress
+            Cidr:
+              value: "0.0.0.0/0"
+          - type: ingress
+            CidrV6:
+              value: "::/0"
+      {%- if tags %}
+      - not:
+        - or:
+          {%- for tag in tags %}
+          {%- if '=' in tag %}
+          - type: value
+            key: "tag:{{ tag.split('=')[0] }}"
+            value: "{{ tag.split('=')[1] }}"
+          {%- else %}
+          - "tag:{{ tag }}": "present"
+          {%- endif %}
+          {%- endfor %}
+      {%- endif %}
