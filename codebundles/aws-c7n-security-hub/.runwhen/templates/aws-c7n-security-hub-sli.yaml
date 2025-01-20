@@ -38,11 +38,11 @@ spec:
       workspaceKey: {{custom.aws_secret_access_key}}
   alerts:
     warning:
-      operator: >
+      operator: '>'
       threshold: '1'
       for: '20m'
     ticket:
-      operator: >
+      operator: '>'
       threshold: '1'
       for: '40m'
     page:
