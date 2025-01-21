@@ -45,15 +45,15 @@ List aws security hub findings in AWS account `${AWS_ACCOUNT_ID}`
                     ${resource_list}=    Create List
                 END
 
+                ${report}=    RW.CLI.Run Cli
+                ...    cmd=jq '.[] | { Findings: ( .["c7n:finding-filter"][] | { Title: .Title, ProductName: .ProductName, Description: .Description, Resources: ( .Resources[] | { Type: .Type, Id: .Id, Region: .Region } ) })}' ${dir}/resources.json
+                RW.Core.Add Pre To Report    ${report.stdout}
+
                 IF    len(@{resource_list}) > 0
                     # Generate and format report
-                    ${report}=    RW.CLI.Run Cli
-                    ...    cmd=echo ${resource_list} | jq '.[] | { Findings: ( .["c7n:finding-filter"][] | { Title: .Title, ProductName: .ProductName, Description: .Description, Resources: ( .Resources[] | { Type: .Type, Id: .Id, Region: .Region } ) })}'
-                    RW.Core.Add Pre To Report    ${report.stdout}
-
                     FOR    ${item}    IN    @{resource_list}
-                        ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
                         FOR    ${finding}    IN    @{item['c7n:finding-filter']}
+                            ${pretty_finding}=    Evaluate    pprint.pformat(${finding})    modules=pprint
                             ${severity_label}=    Set Variable    ${finding['Severity']['Label']}
                             ${severity}=    Evaluate    1 if '${severity_label}' == 'CRITICAL' else 2 if '${severity_label}' == 'HIGH' else 3 if '${severity_label}' == 'MEDIUM' else 4
                             FOR    ${resource}    IN    @{finding['Resources']}
@@ -63,7 +63,7 @@ List aws security hub findings in AWS account `${AWS_ACCOUNT_ID}`
                                 ...    actual=AWS Security Hub detected an issue with the rule `${finding['Title']}` for `${resource['Type']}` `${resource['Id']}` in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                                 ...    title=Security issue detected: Rule `${finding['Title']}` violated by `${resource['Type']}` `${resource['Id']}` in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                                 ...    reproduce_hint=${c7n_output.cmd}
-                                ...    details=${pretty_item}
+                                ...    details=${pretty_finding}
                                 ...    next_steps=Review security hub findings in report related to rule `${finding['Title']}` on resource `${resource['Type']}` `${resource['Id']}` in AWS Region `${region}` and AWS Account `${AWS_ACCOUNT_ID}`
                             END
                         END
