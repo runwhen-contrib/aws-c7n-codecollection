@@ -19,6 +19,7 @@ with the following policy:
             "Effect": "Allow",
             "Action": [
 				"tag:GetResources",
+				"ec2:DescribeRegions",
 				"logs:DescribeLogGroups",
 				"cloudtrail:DescribeTrails",
             ],
