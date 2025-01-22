@@ -1,0 +1,7 @@
+policies:
+  - name: trail-without-cloudwatch-logs
+    resource: aws.cloudtrail
+    filters:
+      - type: value
+        key: CloudWatchLogsLogGroupArn
+        value: absent

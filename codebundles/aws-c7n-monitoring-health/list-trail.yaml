@@ -1,0 +1,3 @@
+policies:
+  - name: list-cloudtrail-trails
+    resource: aws.cloudtrail
