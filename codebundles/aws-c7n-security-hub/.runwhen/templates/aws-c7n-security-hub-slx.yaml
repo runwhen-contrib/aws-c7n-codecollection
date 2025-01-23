@@ -7,7 +7,7 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://PLACEHOLDER.jpg
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Security-Identity-Compliance/Res_AWS-Security-Hub_Finding_48.svg
   alias: AWS Security Hub findings in AWS Account {{match_resource.resource.account_id}}
   asMeasuredBy: The number of AWS Security Hub findings in AWS account {{match_resource.resource.account_id}}
   configProvided:
