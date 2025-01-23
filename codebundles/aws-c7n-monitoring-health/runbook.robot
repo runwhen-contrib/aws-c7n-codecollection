@@ -118,7 +118,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
         END
     END
 
- Check for CloudTrail integration with CloudWatch Logs
+ Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check for CloudTrail integration with CloudWatch Logs
     [Tags]    aws    cloudtrail    cloudwatch    logs
     ${c7n_output}=    RW.CLI.Run Cli
