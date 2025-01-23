@@ -1,9 +1,9 @@
 *** Settings ***
 Metadata            Author   saurabh3460
-Metadata            Supports    AWS    Tag    CloudCustodian
+Metadata            Supports    AWS    Tag    CloudCustodian    CloudTrail    CloudWatch
 Metadata            Display Name    AWS CloudWatch Logs health
-Documentation        List AWS CloudWatch Log Groups that have no retention period.
-Force Tags    Tag    AWS    cloudwatch    logs    cloudtrail
+Documentation       Check AWS Monitoring Configuration Health
+Force Tags          AWS    cloudwatch    logs    cloudtrail
 
 Library    RW.Core
 Library    RW.CLI
@@ -46,7 +46,7 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
             ...    title=CloudWatch Log Group `${item['logGroupName']}` with no retention period detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
-            ...    next_steps=Set a retention period for the CloudWatch Log Group in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    next_steps=Configure retention period for CloudWatch Log Groups in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         END
     ELSE
         RW.Core.Add Pre To Report    "No CloudWatch Log Groups without retention period found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`"
