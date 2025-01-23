@@ -52,7 +52,7 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
         RW.Core.Add Pre To Report    "No CloudWatch Log Groups without retention period found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`"
     END
 
-Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check if CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail
     ${c7n_output}=    RW.CLI.Run Cli
