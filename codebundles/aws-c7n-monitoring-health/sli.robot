@@ -1,9 +1,9 @@
 *** Settings ***
 Metadata            Author   saurabh3460
-Metadata            Supports    AWS    Tag    CloudCustodian
+Metadata            Supports    AWS    Tag    CloudCustodian    CloudTrail    CloudWatch
 Metadata            Display Name    AWS CloudWatch Logs health
-Documentation        Check AWS CloudWatch Log Groups that have no retention set set.
-Force Tags    Tag    AWS    cloudwatch    logs    cloudtrail
+Documentation       Check AWS Monitoring Configuration Health
+Force Tags          AWS    cloudwatch    logs    cloudtrail
 
 Library    RW.Core
 Library    RW.CLI

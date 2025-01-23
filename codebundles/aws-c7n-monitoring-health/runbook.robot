@@ -1,9 +1,9 @@
 *** Settings ***
 Metadata            Author   saurabh3460
-Metadata            Supports    AWS    Tag    CloudCustodian
+Metadata            Supports    AWS    Tag    CloudCustodian    CloudTrail    CloudWatch
 Metadata            Display Name    AWS CloudWatch Logs health
-Documentation        List AWS CloudWatch Log Groups that have no retention period.
-Force Tags    Tag    AWS    cloudwatch    logs    cloudtrail
+Documentation       Check AWS Monitoring Configuration Health
+Force Tags          AWS    cloudwatch    logs    cloudtrail
 
 Library    RW.Core
 Library    RW.CLI
@@ -46,13 +46,13 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
             ...    title=CloudWatch Log Group `${item['logGroupName']}` with no retention period detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
-            ...    next_steps=Set a retention period for the CloudWatch Log Group in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    next_steps=Configure retention period for CloudWatch Log Groups in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         END
     ELSE
         RW.Core.Add Pre To Report    "No CloudWatch Log Groups without retention period found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`"
     END
 
-Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail
     ${c7n_output}=    RW.CLI.Run Cli
@@ -81,7 +81,7 @@ Check if CloudTrail exists and is configured for multi-region in AWS Region `${A
         ...    title=No CloudTrail Found in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         ...    reproduce_hint=${c7n_output.cmd}
         ...    details=${pretty_itemt}
-        ...    next_steps=Create a multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    next_steps=Configure multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
     ELSE
         # Check for multi-region trails
         ${c7n_output}=    RW.CLI.Run Cli
@@ -113,12 +113,12 @@ Check if CloudTrail exists and is configured for multi-region in AWS Region `${A
                     ...    title=CloudTrail `${trail['Name']}` is a single-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
                     ...    reproduce_hint=${c7n_output.cmd}
                     ...    details=${pretty_trail}
-                    ...    next_steps=Create a multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+                    ...    next_steps=Configure CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             END
         END
     END
 
- Check for CloudTrail integration with CloudWatch Logs
+ Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check for CloudTrail integration with CloudWatch Logs
     [Tags]    aws    cloudtrail    cloudwatch    logs
     ${c7n_output}=    RW.CLI.Run Cli
