@@ -35,6 +35,8 @@ List aws security hub findings in AWS account `${AWS_ACCOUNT_ID}`
 
         IF    len(@{dir_list}) > 0
             FOR    ${dir}    IN    @{dir_list}
+                ${product}=    Evaluate    "${dir}".rstrip('/').split('/')[-1].removesuffix('-findings')
+
                 ${report_data}=     RW.CLI.Run Cli
                 ...    cmd=cat ${dir}/resources.json 
 
@@ -47,8 +49,13 @@ List aws security hub findings in AWS account `${AWS_ACCOUNT_ID}`
 
                 ${report}=    RW.CLI.Run Cli
                 ...    cmd=jq '.[] | { Findings: ( .["c7n:finding-filter"][] | { Title: .Title, ProductName: .ProductName, Description: .Description, Resources: ( .Resources[] | { Type: .Type, Id: .Id, Region: .Region } ) })}' ${dir}/resources.json
-                RW.Core.Add Pre To Report    ${report.stdout}
-
+                Log     ${report.stdout}
+                IF    $report.stdout != ""
+                    RW.Core.Add Pre To Report    ${report.stdout}
+                ELSE
+                    RW.Core.Add Pre To Report    "No Security Hub Findings in AWS region ${region} for ${product}"
+                END
+                
                 IF    len(@{resource_list}) > 0
                     # Generate and format report
                     FOR    ${item}    IN    @{resource_list}
@@ -68,8 +75,6 @@ List aws security hub findings in AWS account `${AWS_ACCOUNT_ID}`
                             END
                         END
                     END
-                ELSE
-                    RW.Core.Add Pre To Report    "No Security Hub Findings in AWS region ${region}"
                 END
             END
         ELSE 

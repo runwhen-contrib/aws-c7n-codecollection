@@ -4,7 +4,7 @@ spec:
   platform: aws
   generationRules:
     - resourceTypes:
-        - aws_ec2_security_groups
+        - aws_securityhub_hubs
       matchRules:
         - type: pattern
           pattern: ".+"
