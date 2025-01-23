@@ -81,7 +81,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
         ...    title=No CloudTrail Found in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         ...    reproduce_hint=${c7n_output.cmd}
         ...    details=${pretty_itemt}
-        ...    next_steps=Create a multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    next_steps=Configure multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
     ELSE
         # Check for multi-region trails
         ${c7n_output}=    RW.CLI.Run Cli
@@ -113,7 +113,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
                     ...    title=CloudTrail `${trail['Name']}` is a single-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
                     ...    reproduce_hint=${c7n_output.cmd}
                     ...    details=${pretty_trail}
-                    ...    next_steps=Create a multi-region CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+                    ...    next_steps=Configure CloudTrail in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             END
         END
     END
