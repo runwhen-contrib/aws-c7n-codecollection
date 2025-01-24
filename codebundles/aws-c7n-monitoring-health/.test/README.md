@@ -18,10 +18,20 @@ with the following policy:
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
+				"logs:ListTagsLogGroup",
 				"tag:GetResources",
-				"ec2:DescribeRegions",
+				"cloudtrail:ListTrails",
 				"logs:DescribeLogGroups",
+				"logs:ListLogGroupsForEntity",
+				"logs:DescribeLogStreams",
+				"cloudtrail:GetTrailStatus",
+				"ec2:DescribeRegions",
+				"logs:ListTagsForResource",
 				"cloudtrail:DescribeTrails",
+				"logs:ListLogGroupsForQuery",
+				"cloudtrail:ListTags",
+				"logs:GetLogGroupFields",
+				"logs:ListEntitiesForLogGroup"
             ],
             "Resource": "*"
         }
