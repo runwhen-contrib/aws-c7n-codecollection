@@ -1,0 +1,7 @@
+policies:
+{%- for provider in resource_providers.split(',') %}
+  - name: {{ provider.strip('"').strip("'").strip() }}-findings
+    resource: {{ provider.strip('"').strip("'").strip() }}
+    filters:
+      - finding
+{%- endfor %}
