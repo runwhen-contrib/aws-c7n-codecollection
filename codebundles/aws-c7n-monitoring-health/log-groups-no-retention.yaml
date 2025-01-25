@@ -1,0 +1,9 @@
+policies:
+  - name: log-groups-no-retention
+    description: |
+      This policy identifies CloudWatch Log Groups that have no retention policy set.
+    resource: aws.log-group
+    filters:
+      - type: value
+        key: retentionInDays
+        value: absent 
