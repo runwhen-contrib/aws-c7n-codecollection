@@ -20,7 +20,7 @@ spec:
     {% else %}
     ref: main
     {% endif %}
-    pathToRobot: codebundles/aws-c7n-tag-policy/runbook.robot
+    pathToRobot: codebundles/aws-c7n-tag-compliance/runbook.robot
   configProvided:
     - name: AWS_REGION
       value: "{{match_resource.resource.region}}"
