@@ -1,0 +1,7 @@
+policies:
+  - name: failed-status-certificate
+    resource: acm-certificate
+    filters:
+      - type: value
+        key: Status
+        value: FAILED
