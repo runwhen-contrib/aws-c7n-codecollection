@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Checks for missing tags on AWS resources to ensure compliance with tag policies in AWS account {{match_resource.resource.account_id}}
+  description: Checks for missing tags on AWS resources to ensure compliance with tag compliance in AWS account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
@@ -23,7 +23,7 @@ spec:
     {% else %}
     ref: main
     {% endif %}
-    pathToRobot: codebundles/aws-c7n-tag-policy/sli.robot
+    pathToRobot: codebundles/aws-c7n-tag-compliance/sli.robot
   intervalStrategy: intermezzo
   intervalSeconds: 300
   configProvided:
