@@ -2,7 +2,7 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS ACM health
-Documentation        List AWS ACM certificates that are unused, soon to expire, or expired.
+Documentation        List AWS ACM certificates that are unused, soon to expire, or expired and failed status.
 Force Tags    Tag    AWS    acm    certificate    security    expiration
 
 Library    RW.Core
@@ -129,6 +129,45 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
             ...    next_steps=Renew expired ACM certificate in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         END
     END
+
+List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find failed status ACM certificates
+    [Tags]    aws    acm    certificate    status
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/failed-status-certificate.yaml --cache-period 0
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+
+    ${report_data}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json 
+
+    TRY
+        ${resource_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
+    EXCEPT
+        Log    Failed to load JSON payload, defaulting to empty list.    WARN
+        ${resource_list}=    Create List
+    END
+
+    IF    len(@{resource_list}) > 0
+
+        # Generate and format report
+        ${formatted_results}=    RW.CLI.Run Cli
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Tags"], (.[] | [ .CertificateArn, .DomainName, .Status, .FailureReason, (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
+
+        FOR    ${item}    IN    @{resource_list}
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
+            RW.Core.Add Issue        
+            ...    severity=3
+            ...    expected=ACM certificate `${item['CertificateArn']}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` should not be in FAILED status
+            ...    actual=ACM certificate `${item['CertificateArn']}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` is in FAILED status with reason: ${item['FailureReason']}
+            ...    title=Failed status ACM certificate `${item['CertificateArn']}` detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    reproduce_hint=${c7n_output.cmd}
+            ...    details=${pretty_item}
+            ...    next_steps=Resolve the failure reason for the ACM certificate in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        END
+    END
+
 
 *** Keywords ***
 Suite Initialization
