@@ -1,0 +1,7 @@
+policies:
+  - name: trail-no-multi-region
+    resource: aws.cloudtrail
+    filters:
+      - type: value
+        key: IsMultiRegionTrail
+        value: false
