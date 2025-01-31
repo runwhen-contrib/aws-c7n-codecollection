@@ -19,8 +19,11 @@ with the following policy:
             "Effect": "Allow",
             "Action": [
 				"tag:GetResources",
+				"ec2:DescribeRegions",
+				"acm:DescribeCertificate",
+				"acm:GetCertificate",
 				"acm:ListCertificates",
-				"acm:DescribeCertificate"
+				"acm:ListTagsForCertificate"
             ],
             "Resource": "*"
         }
