@@ -8,7 +8,7 @@ metadata:
     {% include "common-annotations.yaml" %}
 spec:
   location: {{default_location}}
-  description: List AWS ACM certificates that are unused, soon to expire, or expired
+  description: List AWS ACM certificates that are unused, soon to expire, or expired and failed status
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}

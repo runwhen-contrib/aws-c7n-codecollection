@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Count AWS ACM certificates that are unused, soon to expire, or expired in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  description: Count AWS ACM certificates that are unused, soon to expire, or expired and failed status in this AWS region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
