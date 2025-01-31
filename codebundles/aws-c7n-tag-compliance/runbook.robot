@@ -9,7 +9,7 @@ Library    Collections
 Library    RW.Core
 Library    RW.CLI
 Library    CloudCustodian.Core
-Library    utils
+Library    Util.py
 Suite Setup    Suite Initialization
 
 
