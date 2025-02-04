@@ -14,7 +14,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List Missing AWS Resource Tags in AWS account `${AWS_ACCOUNT_ID}` 
+Validate AWS Resource Tag Compliance in Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Identify cloud resources (${AWS_RESOURCE_PROVIDERS}) that are missing required tags as per the organization's tagging policy.
     [Tags]    tag    aws    compliance
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -97,9 +97,9 @@ Suite Initialization
     ...    default=ec2=InstanceId,rds=DBInstanceIdentifier,vpc=VpcId,iam-group=GroupId,iam-policy=PolicyId,iam-user=UserId,security-group=GroupId
     ${AWS_TAGS}=    RW.Core.Import User Variable    AWS_TAGS
     ...    type=string
-    ...    description=Comma-separated list of tags to filter AWS_EC2 instances.
+    ...    description=Comma-separated list of mandatory tags that AWS resources must have for compliance. These tags will be checked across all specified resource types.
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
+    ...    example=Name,Environment,Owner
     ...    default=Name,Environment,Owner
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-tag-compliance         # Note: Clean out the cloud custoding report dir to ensure accurate data
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation     Count total AWS resources that do not follow tag policy
 Metadata          Author    saurabh3460
+Metadata        Supports    AWS    Tag    CloudCustodian
 Force Tags        AWS    Tag    CloudCustodian
 Library          RW.Core
 Library          RW.CLI
@@ -10,7 +11,7 @@ Library          String
 Suite Setup      Suite Initialization
 
 *** Tasks ***
-Check For Missing AWS Resource Tags in AWS account `${AWS_ACCOUNT_ID}` 
+Validate AWS Resource Tag Compliance in Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Count total AWS resources that do not follow tag policy
     ${result}=    CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/tag-compliance.j2      
@@ -127,9 +128,9 @@ Suite Initialization
     ...    default=ec2,rds,vpc,iam-group,iam-policy,iam-user,security-group
     ${AWS_TAGS}=    RW.Core.Import User Variable    AWS_TAGS
     ...    type=string
-    ...    description=Comma-separated list of tags to filter AWS resources
+    ...    description=Comma-separated list of mandatory tags that AWS resources must have for compliance. These tags will be checked across all specified resource types.
     ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=Name,Environment
+    ...    example=Name,Environment,Owner
     ...    default=Name,Environment,Owner
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-tag-compliance
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
