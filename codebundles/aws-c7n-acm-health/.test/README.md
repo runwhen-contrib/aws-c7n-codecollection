@@ -69,12 +69,16 @@ Create this file with the following environment variables:
 ####  Testing Workflow
 
 1. Build test infra:
-	- As this code bundle relies on ACM certificates, which require domain validation, you will need to manually create the ACM certificate and complete the necessary domain verification steps.
-	- Once the certificate is created and validated, ensure that it is properly issued and ready for testing.
+
+	```sh
+		task build-infra
+	```
+
+	**Note**: This code bundle relies on ACM certificates, which require domain validation. You will need to manually validate DNS. Update the `domain_name` variable in `./terraform/variables.tf`. This code bundle will still function even if domain validation fails. 
 
 2. Generate RunWhen Configurations
 	```sh
-		tasks
+		task
 	```
 
 3. Upload generated SLx to RunWhen Platform
