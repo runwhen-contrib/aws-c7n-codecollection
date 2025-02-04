@@ -70,10 +70,8 @@ Create this file with the following environment variables:
 
 ####  Testing Workflow
 
-1. Build test infra:
-	```sh
-		task build-infra
-	```	
+1. Build Test Infrastructure:
+   - **Note**: By default, the test environment leverages existing AWS resources such as **VPCs** and **Security Groups** that are untagged. These resources are sufficient to test the codebundle's tagging compliance functionality.
 
 2. Generate RunWhen Configurations
 	```sh
