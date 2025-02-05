@@ -89,12 +89,6 @@ Suite Initialization
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=ec2,rds,vpc,iam-group,iam-policy,iam-user,security-group
     ...    default=ec2,rds,vpc,iam-group,iam-policy,iam-user,security-group
-    ${AWS_RESOURCE_PROVIDERS_ID_MAPPINGS}=    RW.Core.Import User Variable    AWS_RESOURCE_PROVIDERS_ID_MAPPINGS
-    ...    type=string
-    ...    description=Comma-separated list of AWS Resource Providers and the corresponding ID field name.
-    ...    pattern=^[a-zA-Z0-9,]+$
-    ...    example=ec2=InstanceId,rds=DBInstanceIdentifier
-    ...    default=ec2=InstanceId,rds=DBInstanceIdentifier,vpc=VpcId,iam-group=GroupId,iam-policy=PolicyId,iam-user=UserId,security-group=GroupId
     ${AWS_TAGS}=    RW.Core.Import User Variable    AWS_TAGS
     ...    type=string
     ...    description=Comma-separated list of mandatory tags that AWS resources must have for compliance. These tags will be checked across all specified resource types.
@@ -114,7 +108,6 @@ Suite Initialization
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
-    Set Suite Variable    ${AWS_RESOURCE_PROVIDERS_ID_MAPPINGS}    ${AWS_RESOURCE_PROVIDERS_ID_MAPPINGS}
 
 Process Resources
     [Arguments]    ${region}    ${c7n_output}
@@ -161,9 +154,10 @@ Process Resources
                     ${missing_tags}=    Evaluate    ", ".join($cleaned_tags)
                     # Load resource ID mappings from external JSON file
                     TRY
-                        ${resource_id_mapping}=    GENERATE RESOURCE ID MAPPINGS    ${AWS_RESOURCE_PROVIDERS_ID_MAPPINGS}
+                        ${resource_id_mappings_json}=    RW.CLI.Run Cli    cmd=cat ${CURDIR}/resource_id_mappings.json
+                        ${resource_id_mapping}=    Evaluate    json.loads(r'''${resource_id_mappings_json.stdout}''')    json
                     EXCEPT
-                        Log    Failed to load resource ID mappings file, using default mapping    WARN
+                        Log    Failed to load resource_id_mappings.json, using default mapping    WARN
                         ${resource_id_mapping}=    Create Dictionary
                     END
                     
