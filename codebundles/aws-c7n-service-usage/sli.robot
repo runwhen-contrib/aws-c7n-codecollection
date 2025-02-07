@@ -8,7 +8,7 @@ Force Tags    Tag    AWS    usage
 Library    RW.Core
 Library    RW.CLI
 Library    CloudCustodian.Core
-
+Library    Util.py
 Suite Setup    Suite Initialization
 
 
