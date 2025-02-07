@@ -114,9 +114,9 @@ Suite Initialization
     ${CERT_EXPIRY_DAYS}=    RW.Core.Import User Variable    CERT_EXPIRY_DAYS
     ...    type=string
     ...    description=Number of days before ACM certificate expiry to raise a issue
-    ...    pattern=\w*
+    ...    pattern=^\d+$
     ...    example=30
-    ...    default="30"
+    ...    default=30
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-acm-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
