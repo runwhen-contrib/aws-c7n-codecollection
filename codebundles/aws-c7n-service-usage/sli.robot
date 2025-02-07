@@ -26,7 +26,7 @@ Check for AWS Service Usage Exceeding defined threshold in AWS Account `${AWS_AC
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-service-usage/service-usage/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    RW.Core.Push Metric    int(${count.stdout})
+    RW.Core.Push Metric    Convert to Number    ${count.stdout}    2
 
 ** Keywords ***
 Suite Initialization
