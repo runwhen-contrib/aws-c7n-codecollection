@@ -55,7 +55,7 @@ Suite Initialization
     ${USAGE_PERCENTAGE}=    RW.Core.Import User Variable    USAGE_PERCENTAGE
     ...    type=number
     ...    description=Usage threshold percentage
-    ...    pattern=\d*
+    ...    pattern=^\d+$
     ...    example=80
     ...    default=80
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-service-usage         # Note: Clean out the cloud custoding report dir to ensure accurate data
