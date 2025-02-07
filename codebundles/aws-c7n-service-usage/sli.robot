@@ -51,7 +51,7 @@ Suite Initialization
     ...    description=Comma-separated list of AWS Resource Providers
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
-    ...    default=ec2,firehose
+    ...    default=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
     ${USAGE_PERCENTAGE}=    RW.Core.Import User Variable    USAGE_PERCENTAGE
     ...    type=number
     ...    description=Usage threshold percentage
@@ -69,3 +69,5 @@ Suite Initialization
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${AWS_RESOURCE_PROVIDERS}    ${AWS_RESOURCE_PROVIDERS}
+    Set Suite Variable    ${USAGE_PERCENTAGE}    ${USAGE_PERCENTAGE}
