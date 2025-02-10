@@ -114,6 +114,9 @@ Process Resources
     ${dirs}=    RW.CLI.Run Cli
     ...    cmd=find ${OUTPUT_DIR}/aws-c7n-tag-compliance/${region} -mindepth 1 -maxdepth 1 -type d | jq -R -s 'split("\n") | map(select(length > 0))';
 
+    # Add region header to report
+    RW.Core.Add Pre To Report    === Region: ${region} ===
+    
     TRY
         ${dir_list}=    Evaluate    json.loads(r'''${dirs.stdout}''')    json
         Log    ${dirs.stdout}
@@ -121,6 +124,10 @@ Process Resources
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         RETURN
     END
+
+    # Initialize region-specific issue tracking
+    ${region_issues}=    Create Dictionary
+    ${region_resources}=    Create List
 
     IF    len(@{dir_list}) > 0
         FOR    ${dir}    IN    @{dir_list}
@@ -138,13 +145,20 @@ Process Resources
             END
 
             IF    len(@{resource_list}) > 0
-                ${pretty_resource_list}=    Evaluate    pprint.pformat(${resource_list})    modules=pprint
-                RW.Core.Add Pre To Report    ${pretty_resource_list}
                 ${resource_type}=    Set Variable    ${meta_list["policy"]["resource"]}
                 ${resource_type_title}=    Set Variable    ${resource_type.title()}
-                ${resource_id}=    Set Variable    ${EMPTY}
+                
+                # Load resource ID mappings
+                TRY
+                    ${resource_id_mappings_json}=    RW.CLI.Run Cli    cmd=cat ${CURDIR}/resource_id_mappings.json
+                    ${resource_id_mapping}=    Evaluate    json.loads(r'''${resource_id_mappings_json.stdout}''')    json
+                EXCEPT
+                    Log    Failed to load resource_id_mappings.json, using default mapping    WARN
+                    ${resource_id_mapping}=    Create Dictionary
+                END
+                
+                # Collect all resources with missing tags
                 FOR    ${item}    IN    @{resource_list}
-                    ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
                     ${matched_filters}=    Set Variable    ${item["c7n:MatchedFilters"]}
                     ${cleaned_tags}=    Create List
                     FOR    ${tag}    IN    @{matched_filters}
@@ -152,38 +166,49 @@ Process Resources
                         Append To List    ${cleaned_tags}    ${cleaned_tag}
                     END
                     ${missing_tags}=    Evaluate    ", ".join($cleaned_tags)
-                    # Load resource ID mappings from external JSON file
-                    TRY
-                        ${resource_id_mappings_json}=    RW.CLI.Run Cli    cmd=cat ${CURDIR}/resource_id_mappings.json
-                        ${resource_id_mapping}=    Evaluate    json.loads(r'''${resource_id_mappings_json.stdout}''')    json
-                    EXCEPT
-                        Log    Failed to load resource_id_mappings.json, using default mapping    WARN
-                        ${resource_id_mapping}=    Create Dictionary
-                    END
-                    
                     ${resource_id}=    Set Variable    ${resource_id_mapping.get('${resource_type}')}
-                    IF    len("${resource_id}") > 0
-                        RW.Core.Add Issue
-                        ...    severity=4
-                        ...    expected=AWS `${resource_type_title}` `${item['${resource_id}']}` in AWS Region `${region}` in AWS account `${AWS_ACCOUNT_ID}` should have the following Tags `${missing_tags}`.
-                        ...    actual=AWS `${resource_type_title}` `${item['${resource_id}']}` in AWS Region `${region}` in AWS account `${AWS_ACCOUNT_ID}` missing tags `${missing_tags}`
-                        ...    title=Missing tags `${missing_tags}` on `${resource_type_title}` `${item['${resource_id}']} detected in AWS Account `${AWS_ACCOUNT_ID}`
-                        ...    reproduce_hint=${c7n_output.cmd}
-                        ...    details=${pretty_item}
-                        ...    next_steps=Add missing tags `${missing_tags}` to AWS `${resource_type_title}` in AWS region `${region}` and AWS account `${AWS_ACCOUNT_ID}`.
-                    ELSE
-                        RW.Core.Add Issue        
-                        ...    severity=4
-                        ...    expected=AWS `${resource_type_title}` in AWS Region `${region}` in AWS account `${AWS_ACCOUNT_ID}` should have the following Tags `${AWS_TAGS}`.
-                        ...    actual=AWS `${resource_type_title}` in AWS Region `${region}` in AWS account `${AWS_ACCOUNT_ID}` missing tags `${AWS_TAGS}`
-                        ...    title=Missing tags `${AWS_TAGS}` on `${resource_type_title}` detected in AWS Account `${AWS_ACCOUNT_ID}`
-                        ...    reproduce_hint=${c7n_output.cmd}
-                        ...    details=${pretty_item}
-                        ...    next_steps=Escalate to the service owner to review AWS ${resource_type_title} in AWS region `${region}` and AWS account `${AWS_ACCOUNT_ID}` for missing tags: `${AWS_TAGS}`.\nAdd missing tags `${AWS_TAGS}` to AWS `${RESOURCE_TYPE}` in AWS region `${region}` and AWS account `${AWS_ACCOUNT_ID}`.
-                    END
+                    
+                    # Add resource to region-specific list
+                    ${resource_details}=    Create Dictionary
+                    ...    type=${resource_type_title}
+                    ...    id=${item['${resource_id}'] if len("${resource_id}") > 0 else "N/A"}
+                    ...    missing_tags=${missing_tags}
+                    Append To List    ${region_resources}    ${resource_details}
                 END
             END
         END
+        
+        # If we found resources with issues in this region
+        IF    len(@{region_resources}) > 0
+            # Create markdown table of resources
+            ${table_header}=    Set Variable    | Resource Type | Resource ID | Missing Tags |\n|--------------|-------------|--------------|
+            ${table_rows}=    Create List
+            FOR    ${resource}    IN    @{region_resources}
+                ${row}=    Set Variable    | ${resource['type']} | ${resource['id']} | ${resource['missing_tags']} |
+                Append To List    ${table_rows}    ${row}
+            END
+            ${table}=    Set Variable    ${table_header}
+            FOR    ${row}    IN    @{table_rows}
+                ${table}=    Set Variable    ${table}\n${row}
+            END
+            
+            # Add table to report
+            RW.Core.Add Pre To Report    ${table}
+            
+            # Get the count of resources with issues
+            ${resource_count}=    Get Length    ${region_resources}
+            
+            # Create single issue per region
+            RW.Core.Add Issue
+            ...    severity=4
+            ...    expected=All resources in AWS Region `${region}` should have the following Tags `${AWS_TAGS}`.
+            ...    actual=Found ${resource_count} resources in AWS Region `${region}` missing required tags.
+            ...    title=Missing tags `${AWS_TAGS}` detected in AWS Region `${region}`
+            ...    reproduce_hint=${c7n_output.cmd}
+            ...    details=The following resources are missing required tags:\n\n${table}
+            ...    next_steps=Apply missing tags `${AWS_TAGS}` to resources in AWS region `${region}` and AWS account `${AWS_ACCOUNT_ID}`.
+        END
     ELSE 
-        Log    No directories found to process.    WARN
+        Log    No resources found in region ${region}.    INFO
+        RW.Core.Add Pre To Report    No resources found in region ${region}.
     END
