@@ -7,8 +7,8 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: http://IMAGE_URL_PLACEHOLDER
-  alias: Checks for missing tags on AWS resources in AWS account {{match_resource.resource.account_id}}
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/tag.svg
+  alias: Tagging Compliance Check for AWS account {{match_resource.resource.account_id}}
   asMeasuredBy: The number of AWS resources missing required tags in AWS account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
