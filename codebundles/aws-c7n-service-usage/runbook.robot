@@ -24,7 +24,7 @@ List AWS Service Usage Exceeding defined threshold in AWS Account ${AWS_ACCOUNT_
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-service-usage ${CURDIR}/service-usage.yaml --cache-period 0
     ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-
+    ...    timeout_seconds=200
     ${report_data}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-service-usage/service-usage/resources.json 
 

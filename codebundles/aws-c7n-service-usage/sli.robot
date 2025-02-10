@@ -24,9 +24,10 @@ Check for AWS Service Usage Exceeding defined threshold in AWS Account `${AWS_AC
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-service-usage ${CURDIR}/service-usage.yaml --cache-period 0
     ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    timeout_seconds=200
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-service-usage/service-usage/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    RW.Core.Push Metric    Convert to Number    ${count.stdout}    2
+    RW.Core.Push Metric    ${count.stdout}    
 
 ** Keywords ***
 Suite Initialization
