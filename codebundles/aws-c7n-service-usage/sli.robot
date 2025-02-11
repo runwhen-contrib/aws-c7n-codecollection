@@ -49,13 +49,13 @@ Suite Initialization
     ...    pattern=\w*
     ${AWS_RESOURCE_PROVIDERS}=    RW.Core.Import User Variable    AWS_RESOURCE_PROVIDERS
     ...    type=string
-    ...    description=Comma-separated list of AWS Resource Providers
+    ...    description=Comma separated list of AWS Resource Providers
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
     ...    default=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
     ${USAGE_PERCENTAGE}=    RW.Core.Import User Variable    USAGE_PERCENTAGE
     ...    type=number
-    ...    description=Usage threshold percentage
+    ...    description=Threshold percentage for service usage monitoring. If usage exceeds this value, an issue will be raised.
     ...    pattern=^\d+$
     ...    example=80
     ...    default=80
