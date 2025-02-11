@@ -44,15 +44,15 @@ List AWS Service Usage Exceeding defined threshold in AWS Account ${AWS_ACCOUNT_
             ${usage_percentage}=    Evaluate    round(${service['c7n:UsageMetric']['metric']}/${service['c7n:UsageMetric']['quota']}*100, 2)
             RW.Core.Add Issue        
             ...    severity=3
-            ...    expected=Service `${service['ServiceName']}` usage should be below ${USAGE_PERCENTAGE}% of quota
-            ...    actual=Service `${service['ServiceName']}` usage is at `${usage_percentage}%` of quota
-            ...    title=Service `${service['ServiceName']}` usage exceeds threshold
+            ...    expected=Service `${service['ServiceName']}` usage should be below ${USAGE_PERCENTAGE}% of quota in AWS Account `${AWS_ACCOUNT_ID}`
+            ...    actual=Service `${service['ServiceName']}` usage is at `${usage_percentage}%` of quota in AWS Account `${AWS_ACCOUNT_ID}`
+            ...    title=Service `${service['ServiceName']}` usage exceeds threshold ${USAGE_PERCENTAGE}% in AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${service}
-            ...    next_steps=Increase the limit of `${service['ServiceName']}`
+            ...    next_steps=Increase the limit of AWS service `${service['ServiceName']}` in AWS Account `${AWS_ACCOUNT_ID}`
         END
     ELSE
-        RW.Core.Add Pre To Report    No services found with usage exceeding `${USAGE_PERCENTAGE}%` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        RW.Core.Add Pre To Report    No services found with usage exceeding `${USAGE_PERCENTAGE}%` in AWS Account `${AWS_ACCOUNT_ID}`
     END
     
 ** Keywords ***
@@ -75,13 +75,13 @@ Suite Initialization
     ...    pattern=\w*
     ${AWS_RESOURCE_PROVIDERS}=    RW.Core.Import User Variable    AWS_RESOURCE_PROVIDERS
     ...    type=string
-    ...    description=Comma-separated list of AWS Resource Providers
+    ...    description=Comma separated list of AWS Resource Providers
     ...    pattern=^[a-zA-Z0-9,]+$
     ...    example=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
     ...    default=ec2,firehose,lambda,logs,monitoring,rds,servicequotas,ssm,fargate,kms
     ${USAGE_PERCENTAGE}=    RW.Core.Import User Variable    USAGE_PERCENTAGE
     ...    type=number
-    ...    description=Usage threshold percentage
+    ...    description=Threshold percentage for service usage monitoring. If usage exceeds this value, an issue will be raised.
     ...    pattern=^\d+$
     ...    example=80
     ...    default=80
