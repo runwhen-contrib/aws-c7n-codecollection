@@ -151,12 +151,13 @@ def generate_region_report(region, resources):
     for resource in resources:
         resource_type = resource.get('type', 'N/A').lower()
         resource_id = resource.get('id', 'N/A')
-        arn = quote(resource.get('arn',''), safe='') 
+        arn = resource.get('arn','') 
+        safe_arn = quote(arn, safe='') 
         if resource_type.startswith('iam-'):  # Fixed method name
             if arn:  # Check if arn is not None or empty
                 resource_id = arn.split(":")[-1].split("/")[-1]  # Extract last part
                 
-        console_link = generate_aws_console_link(resource_type, resource_id, arn, region)
+        console_link = generate_aws_console_link(resource_type, resource_id, safe_arn, region)
 
         
         table_data.append([
