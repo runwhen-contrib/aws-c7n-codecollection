@@ -89,7 +89,34 @@ Validate AWS Resource Tag Compliance in Account `${AWS_ACCOUNT_ID}`
                     TRY
                         ${resource_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
                         ${resource_count}=    Get Length    ${resource_list}
-                        ${total_noncompliant}=    Evaluate    ${total_noncompliant} + ${resource_count}
+                        
+                        # Filter out default resources
+                        ${filtered_resources}=    Create List
+                        FOR    ${item}    IN    @{resource_list}
+                            ${is_default}=    Set Variable    ${False}
+                            ${cidr_block}=    Set Variable    ${item.get('CidrBlock', '')}
+                            ${sg_group_name}=    Set Variable    ${item.get('GroupName', '')}
+                            ${sg_description}=    Set Variable    ${item.get('Description', '')}
+                            
+                            # Check for default security group
+                            IF    'security-group' in '${dir}'.lower()
+                                IF    '${sg_group_name}' == 'default' or 'default' in '${sg_description}'.lower()
+                                    ${is_default}=    Set Variable    ${True}
+                                END
+                            END
+                            
+                            # Check for default VPC CIDR block
+                            IF    '${cidr_block}' == '172.31.0.0/16'
+                                ${is_default}=    Set Variable    ${True}
+                            END
+                            
+                            IF    not ${is_default}
+                                Append To List    ${filtered_resources}    ${item}
+                            END
+                        END
+                        
+                        ${filtered_count}=    Get Length    ${filtered_resources}
+                        ${total_noncompliant}=    Evaluate    ${total_noncompliant} + ${filtered_count}
                     EXCEPT
                         Log    Failed to load JSON payload, skipping directory.    WARN
                     END
