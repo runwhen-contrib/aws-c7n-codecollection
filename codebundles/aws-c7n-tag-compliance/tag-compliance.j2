@@ -1,0 +1,12 @@
+policies:
+{%- for provider in resource_providers.split(',') %}
+  - name: {{ provider.strip('"').strip("'").strip() }}
+    resource: {{ provider.strip('"').strip("'").strip() }}
+    {%- if tags|length > 0 %}
+    filters:
+      - or:
+      {%- for tag in tags %}
+        - "tag:{{tag}}": absent
+      {%- endfor %}
+    {% endif %}
+{%- endfor %}
