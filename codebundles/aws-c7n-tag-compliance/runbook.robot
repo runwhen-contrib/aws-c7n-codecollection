@@ -46,7 +46,7 @@ Validate AWS Resource Tag Compliance in Account `${AWS_ACCOUNT_ID}`
         ...    cmd=custodian run -r ${first_region} --output-dir ${OUTPUT_DIR}/aws-c7n-tag-compliance/${first_region} ${CURDIR}/tag-compliance.yaml -t ${global_types} --cache-period 0
         ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
         ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-
+        ...    timeout_seconds=200
         Process Resources    ${first_region}    ${c7n_output}
         RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-tag-compliance/${first_region}
     END
@@ -59,7 +59,7 @@ Validate AWS Resource Tag Compliance in Account `${AWS_ACCOUNT_ID}`
             ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/aws-c7n-tag-compliance/${region} ${CURDIR}/tag-compliance.yaml -t ${regional_types} --cache-period 0
             ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
             ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-
+            ...    timeout_seconds=200
             Process Resources    ${region}    ${c7n_output}
         END
     END
@@ -113,10 +113,7 @@ Process Resources
     [Arguments]    ${region}    ${c7n_output}
     ${dirs}=    RW.CLI.Run Cli
     ...    cmd=find ${OUTPUT_DIR}/aws-c7n-tag-compliance/${region} -mindepth 1 -maxdepth 1 -type d | jq -R -s 'split("\n") | map(select(length > 0))';
-
-    # Add region header to report
-    RW.Core.Add Pre To Report    === Region: ${region} ===
-    
+ 
     TRY
         ${dir_list}=    Evaluate    json.loads(r'''${dirs.stdout}''')    json
         Log    ${dirs.stdout}
@@ -167,12 +164,20 @@ Process Resources
                     END
                     ${missing_tags}=    Evaluate    ", ".join($cleaned_tags)
                     ${resource_id}=    Set Variable    ${resource_id_mapping.get('${resource_type}')}
-                    
+                    # Find ARN if available
+                    ${arn}=    Set Variable    ${EMPTY}
+                    FOR    ${key}    IN    @{item.keys()}
+                        IF    'arn' in '${key}'.lower()
+                            ${arn}=    Set Variable    ${item['${key}']}
+                            BREAK
+                        END
+                    END
                     # Add resource to region-specific list
                     ${resource_details}=    Create Dictionary
                     ...    type=${resource_type_title}
                     ...    id=${item['${resource_id}'] if len("${resource_id}") > 0 else "N/A"}
                     ...    missing_tags=${missing_tags}
+                    ...    arn=${arn}
                     Append To List    ${region_resources}    ${resource_details}
                 END
             END
@@ -181,23 +186,12 @@ Process Resources
         # If we found resources with issues in this region
         IF    len(@{region_resources}) > 0
             # Create markdown table of resources
-            ${table_header}=    Set Variable    | Resource Type | Resource ID | Missing Tags |\n|--------------|-------------|--------------|
-            ${table_rows}=    Create List
-            FOR    ${resource}    IN    @{region_resources}
-                ${row}=    Set Variable    | ${resource['type']} | ${resource['id']} | ${resource['missing_tags']} |
-                Append To List    ${table_rows}    ${row}
-            END
-            ${table}=    Set Variable    ${table_header}
-            FOR    ${row}    IN    @{table_rows}
-                ${table}=    Set Variable    ${table}\n${row}
-            END
-            
+            ${report}=    GENERATE REGION REPORT    ${region}    ${region_resources}            
             # Add table to report
-            RW.Core.Add Pre To Report    ${table}
-            
+            RW.Core.Add Pre To Report    ${report}
             # Get the count of resources with issues
             ${resource_count}=    Get Length    ${region_resources}
-            
+            ${pretty_item}=    Evaluate    pprint.pformat(${region_resources})    modules=pprint
             # Create single issue per region
             RW.Core.Add Issue
             ...    severity=4
@@ -205,7 +199,7 @@ Process Resources
             ...    actual=Found ${resource_count} resources in AWS Region `${region}` missing required tags.
             ...    title=Missing tags `${AWS_TAGS}` detected in AWS Region `${region}`
             ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=The following resources are missing required tags:\n\n${table}
+            ...    details=${pretty_item}
             ...    next_steps=Apply missing tags `${AWS_TAGS}` to resources in AWS region `${region}` and AWS account `${AWS_ACCOUNT_ID}`.
         END
     ELSE 
