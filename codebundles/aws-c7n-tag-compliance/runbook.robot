@@ -172,6 +172,29 @@ Process Resources
                             BREAK
                         END
                     END
+                    # Check if this is a default resource
+                    ${is_default}=    Set Variable    ${False}
+                    ${cidr_block}=    Set Variable    ${item.get('CidrBlock', '')}
+                    ${sg_group_name}=    Set Variable    ${item.get('GroupName', '')}
+                    ${sg_description}=    Set Variable    ${item.get('Description', '')}
+                    ${vpc_id}=    Set Variable    ${item.get('VpcId', '')}
+
+                    # Check for default security group
+                    IF    '${resource_type}'.lower() == 'security-group'
+                        IF    '${sg_group_name}' == 'default' or 'default' in '${sg_description}'.lower()
+                            ${is_default}=    Set Variable    ${True}
+                        END
+                    END
+
+                    # Check for default VPC CIDR block
+                    IF    '${cidr_block}' == '172.31.0.0/16'
+                        ${is_default}=    Set Variable    ${True}
+                    END
+
+                    # Skip default resources
+                    IF    ${is_default}
+                        Continue For Loop
+                    END
                     # Add resource to region-specific list
                     ${resource_details}=    Create Dictionary
                     ...    type=${resource_type_title}
