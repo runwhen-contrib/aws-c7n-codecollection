@@ -115,7 +115,7 @@ Process Resources
     ...    cmd=find ${OUTPUT_DIR}/aws-c7n-tag-compliance/${region} -mindepth 1 -maxdepth 1 -type d | jq -R -s 'split("\n") | map(select(length > 0))';
 
     # Add region header to report
-    RW.Core.Add Pre To Report    === Region: ${region} ===
+    # RW.Core.Add Pre To Report    === Region: ${region} ===
     
     TRY
         ${dir_list}=    Evaluate    json.loads(r'''${dirs.stdout}''')    json
@@ -183,6 +183,8 @@ Process Resources
             # Create markdown table of resources
             ${table_header}=    Set Variable    | Resource Type | Resource ID | Missing Tags |\n|--------------|-------------|--------------|
             ${table_rows}=    Create List
+            ${report}=    GENERATE REGION REPORT    ${region}    ${region_resources}
+            Log    ${report}
             FOR    ${resource}    IN    @{region_resources}
                 ${row}=    Set Variable    | ${resource['type']} | ${resource['id']} | ${resource['missing_tags']} |
                 Append To List    ${table_rows}    ${row}
@@ -193,7 +195,7 @@ Process Resources
             END
             
             # Add table to report
-            RW.Core.Add Pre To Report    ${table}
+            RW.Core.Add Pre To Report    ${report}
             
             # Get the count of resources with issues
             ${resource_count}=    Get Length    ${region_resources}
