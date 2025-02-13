@@ -2,7 +2,7 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS ACM health
-Documentation        Count AWS ACM certificates that are unused, soon to expire, or expired and failed status.
+Documentation        Count AWS ACM certificates that are unused, Expiring, or expired and failed status.
 Force Tags    Tag    AWS    acm    certificate    security    expiration
 
 Library    RW.Core
@@ -24,8 +24,8 @@ Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `
     ${unused_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_UNUSED_CERTIFICATES}) else 0
     Set Global Variable    ${unused_certificate_score}
 
-Check for soon to expire ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Find soon to expire ACM certificates
+Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find Expiring ACM certificates
     [Tags]    aws    acm    certificate    expiration 
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/soon-to-expire-certificates.j2
@@ -36,8 +36,8 @@ Check for soon to expire ACM certificates in AWS Region `${AWS_REGION}` in AWS a
     ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
-    ${soon_to_expire_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_SOON_TO_EXPIRE_CERTIFICATES}) else 0
-    Set Global Variable    ${soon_to_expire_certificate_score}
+    ${expiring_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRING_CERTIFICATES}) else 0
+    Set Global Variable    ${expiring_certificate_score}
 
 Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find expired ACM certificates
@@ -65,7 +65,7 @@ Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
 
 
 Generate Health Score
-    ${health_score}=      Evaluate  (${unused_certificate_score} + ${soon_to_expire_certificate_score} + ${expired_certificate_score} + ${failed_certificate_score}) / 4
+    ${health_score}=      Evaluate  (${unused_certificate_score} + ${expiring_certificate_score} + ${expired_certificate_score} + ${failed_certificate_score}) / 4
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
 
@@ -99,9 +99,9 @@ Suite Initialization
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
-    ${MAX_SOON_TO_EXPIRE_CERTIFICATES}=    RW.Core.Import User Variable    MAX_SOON_TO_EXPIRE_CERTIFICATES
+    ${MAX_EXPIRING_CERTIFICATES}=    RW.Core.Import User Variable    MAX_EXPIRING_CERTIFICATES
     ...    type=string
-    ...    description=The maximum number of soon to expire ACM certificates to consider healthy
+    ...    description=The maximum number of Expiring ACM certificates to consider healthy
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
@@ -123,7 +123,7 @@ Suite Initialization
     Set Suite Variable    ${CERT_EXPIRY_DAYS}    ${CERT_EXPIRY_DAYS}
     Set Suite Variable    ${MAX_UNUSED_CERTIFICATES}    ${MAX_UNUSED_CERTIFICATES}
     Set Suite Variable    ${MAX_FAILED_CERTIFICATES}    ${MAX_FAILED_CERTIFICATES}
-    Set Suite Variable    ${MAX_SOON_TO_EXPIRE_CERTIFICATES}    ${MAX_SOON_TO_EXPIRE_CERTIFICATES}
+    Set Suite Variable    ${MAX_EXPIRING_CERTIFICATES}    ${MAX_EXPIRING_CERTIFICATES}
     Set Suite Variable    ${MAX_EXPIRED_CERTIFICATES}    ${MAX_EXPIRED_CERTIFICATES}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}

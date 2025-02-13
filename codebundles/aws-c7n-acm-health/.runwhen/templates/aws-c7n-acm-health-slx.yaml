@@ -7,15 +7,15 @@ metadata:
   annotations:
     {% include "common-annotations.yaml" %}
 spec:
-  imageURL: https://PLACEHOLDER.svg
+  imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/certificate_manager.svg
   alias: AWS ACM Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
-  asMeasuredBy: The number of AWS ACM certificates that are unused, soon to expire, or expired and failed status in this region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  asMeasuredBy: The number of AWS ACM certificates that are unused, expiring or expired and failed status in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
   owners:
   - {{workspace.owner_email}}
-  statement: Identify ACM certificates that are unused, soon to expire, or expired and failed status
+  statement: Identify ACM certificates that are unused, expiring, expired, or failed
   additionalContext:
     region: "{{match_resource.resource.region}}"
     account_id: "{{match_resource.resource.account_id}}"
