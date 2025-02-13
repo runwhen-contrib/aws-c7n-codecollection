@@ -2,7 +2,7 @@
 Metadata            Author   saurabh3460
 Metadata            Supports    AWS    Tag    CloudCustodian
 Metadata            Display Name    AWS ACM health
-Documentation        List AWS ACM certificates that are unused, soon to expire, or expired and failed status.
+Documentation        List AWS ACM certificates that are unused, Expiring, or expired and failed status.
 Force Tags    Tag    AWS    acm    certificate    security    expiration
 
 Library    RW.Core
@@ -43,17 +43,17 @@ List Unused ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS
             ...    severity=4
             ...    expected=ACM certificate `${item['CertificateArn']}` should be in use in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` 
             ...    actual=Unused ACM certificate `${item['CertificateArn']}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` is not in use
-            ...    title=Unused ACM certificate `${item['CertificateArn']}` detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    title=Unused ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
-            ...    next_steps=Remove unused ACM certificate in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    next_steps=Remove unused ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         END
     ELSE
         RW.Core.Add Pre To Report    No unused ACM certificates found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
 
-List Soon to Expire ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-    [Documentation]  Find soon to expire ACM certificates
+List Expiring ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find Expiring ACM certificates
     [Tags]    aws    acm    certificate    expiration
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/soon-to-expire-certificates.j2
@@ -87,10 +87,10 @@ List Soon to Expire ACM Certificates in AWS Region `${AWS_REGION}` in AWS Accoun
             ...    severity=3
             ...    expected=ACM certificate `${item['CertificateArn']}` should be renewed at least `${CERT_EXPIRY_DAYS}` days before it expires in in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    actual=ACM certificate `${item['CertificateArn']}` will expire in `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=ACM certificate `${item['CertificateArn']}` nearing expiration within `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    title=ACM certificates are nearing expiration within `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
-            ...    next_steps=Renew the ACM certificate before it expires in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    next_steps=Renew Expiring ACM Certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
         END
     ELSE
             RW.Core.Add Pre To Report    No ACM certificates nearing expiration found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
@@ -126,7 +126,7 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
             ...    severity=3
             ...    expected=ACM certificate `${item['CertificateArn']}` should not be expired in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
             ...    actual=ACM certificate `${item['CertificateArn']}` is expired in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=Expired ACM certificate `${item['CertificateArn']}` detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ...    title=Expired ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
             ...    next_steps=Renew expired ACM certificate in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
@@ -166,10 +166,10 @@ List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account
             ...    severity=3
             ...    expected=ACM certificate `${item['CertificateArn']}` should not be in a FAILED status in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
             ...    actual=ACM certificate `${item['CertificateArn']}` is in a FAILED status due to: ${item['FailureReason']} in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=ACM certificate `${item['CertificateArn']}` in FAILED status detected in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
+            ...    title=ACM Certificates are in a FAILED status detected in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
             ...    reproduce_hint=${c7n_output.cmd}
             ...    details=${pretty_item}
-            ...    next_steps=Investigate and resolve the failure reason for the ACM certificate in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
+            ...    next_steps=Investigate and resolve the failure reason for the ACM certificate in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`\nEscalate ACM Certificate Provisioning Issues to Service Owner
         END
     ELSE
         RW.Core.Add Pre To Report    No ACM certificates in failed status found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
