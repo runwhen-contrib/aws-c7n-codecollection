@@ -34,7 +34,7 @@ List Unused ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS
         ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter","Link", "Tags"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])), (.Tags | map(.Key + "=" + .Value) | join(","))]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
         RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
@@ -81,7 +81,7 @@ List Expiring ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${A
         ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter","Link", "Tags"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"),("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])), (.Tags | map(.Key + "=" + .Value) | join(","))]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
         RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
@@ -123,7 +123,7 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
         ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter","Link" "Tags"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])), (.Tags | map(.Key + "=" + .Value) | join(","))]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
         RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
@@ -167,7 +167,7 @@ List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account
     IF    ${len} > 0
         # Format and display results
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, .FailureReason, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Link", "Tags"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, .FailureReason, ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])), (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
         RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
@@ -210,7 +210,7 @@ List Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
     IF    ${len} > 0
         # Format and display results
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "Link", "Tags"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])), (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
         RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
