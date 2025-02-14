@@ -35,7 +35,7 @@ List Unused ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
-        RW.Core.Add To Report    ${formatted_results.stdout}
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
@@ -82,7 +82,7 @@ List Expiring ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${A
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
-        RW.Core.Add To Report    ${formatted_results.stdout}
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
@@ -124,7 +124,7 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
-        RW.Core.Add To Report    ${formatted_results.stdout}
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
@@ -168,7 +168,7 @@ List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account
         # Format and display results
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, .FailureReason, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
-        RW.Core.Add To Report    ${formatted_results.stdout}
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
@@ -211,7 +211,7 @@ List Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
         # Format and display results
         ${formatted_results}=    RW.CLI.Run Cli
         ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
-        RW.Core.Add To Report    ${formatted_results.stdout}
+        RW.Core.Add Pre To Report    ${formatted_results.stdout}
 
         ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
