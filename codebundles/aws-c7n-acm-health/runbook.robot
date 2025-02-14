@@ -29,25 +29,28 @@ List Unused ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS
         Log    Failed to load JSON payload, defaulting to empty list.    WARN
         ${resource_list}=    Create List
     END
-
+    
     IF    len(@{resource_list}) > 0
-
+        ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags"], (.[] | [ .CertificateArn, .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
-        RW.Core.Add Pre To Report    ${formatted_results.stdout}
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        RW.Core.Add To Report    ${formatted_results.stdout}
 
+        ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
             ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
-            RW.Core.Add Issue        
-            ...    severity=4
-            ...    expected=ACM certificate `${item['CertificateArn']}` should be in use in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` 
-            ...    actual=Unused ACM certificate `${item['CertificateArn']}` in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` is not in use
-            ...    title=Unused ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${pretty_item}
-            ...    next_steps=Remove unused ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ${all_cert_details}=    Catenate    SEPARATOR=\n\n    ${all_cert_details}    ${pretty_item}
         END
+
+        RW.Core.Add Issue        
+        ...    severity=4
+        ...    expected=All ACM certificates should be in use in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    actual=Found ${len} unused ACM certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    title=Unused ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    reproduce_hint=${c7n_output.cmd}
+        ...    details=${all_cert_details}
+        ...    next_steps=Remove unused ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
     ELSE
         RW.Core.Add Pre To Report    No unused ACM certificates found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
@@ -75,25 +78,28 @@ List Expiring ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${A
     END
 
     IF    len(@{resource_list}) > 0
-
+        ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags"], (.[] | [ .CertificateArn, .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
-        RW.Core.Add Pre To Report    ${formatted_results.stdout}
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        RW.Core.Add To Report    ${formatted_results.stdout}
 
+        ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
             ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
-            RW.Core.Add Issue        
-            ...    severity=3
-            ...    expected=ACM certificate `${item['CertificateArn']}` should be renewed at least `${CERT_EXPIRY_DAYS}` days before it expires in in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    actual=ACM certificate `${item['CertificateArn']}` will expire in `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=ACM certificates are nearing expiration within `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${pretty_item}
-            ...    next_steps=Renew Expiring ACM Certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ${all_cert_details}=    Catenate    SEPARATOR=\n\n    ${all_cert_details}    ${pretty_item}
         END
+
+        RW.Core.Add Issue        
+        ...    severity=3
+        ...    expected=All ACM certificates should be renewed at least `${CERT_EXPIRY_DAYS}` days before expiration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    actual=Found ${len} ACM certificates expiring within `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    title=ACM certificates nearing expiration detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    reproduce_hint=${c7n_output.cmd}
+        ...    details=${all_cert_details}
+        ...    next_steps=Renew expiring ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
     ELSE
-            RW.Core.Add Pre To Report    No ACM certificates nearing expiration found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        RW.Core.Add Pre To Report    No ACM certificates nearing expiration found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
 
 List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
@@ -114,23 +120,26 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
     END
 
     IF    len(@{resource_list}) > 0
-
+        ${len}    Get length    ${resource_list}    
         # Generate and format report
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags"], (.[] | [ .CertificateArn, .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
-        RW.Core.Add Pre To Report    ${formatted_results.stdout}
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "InUse", "NotAfter", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .InUse, (.NotAfter // "Unknown"), (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        RW.Core.Add To Report    ${formatted_results.stdout}
 
+        ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
             ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
-            RW.Core.Add Issue        
-            ...    severity=3
-            ...    expected=ACM certificate `${item['CertificateArn']}` should not be expired in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-            ...    actual=ACM certificate `${item['CertificateArn']}` is expired in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=Expired ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
-            ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${pretty_item}
-            ...    next_steps=Renew expired ACM certificate in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+            ${all_cert_details}=    Catenate    SEPARATOR=\n\n    ${all_cert_details}    ${pretty_item}
         END
+
+        RW.Core.Add Issue        
+        ...    severity=3
+        ...    expected=All ACM certificates should be renewed before expiration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    actual=Found ${len} expired ACM certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    title=Expired ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    reproduce_hint=${c7n_output.cmd}
+        ...    details=${all_cert_details}
+        ...    next_steps=Renew expired ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
     ELSE
         RW.Core.Add Pre To Report    No expired ACM certificates found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
@@ -153,26 +162,72 @@ List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account
         ${resource_list}=    Create List
     END
 
-    IF    len(@{resource_list}) > 0
-
-        # Generate and format report
+    ${len}    Get length    ${resource_list}
+    
+    IF    ${len} > 0
+        # Format and display results
         ${formatted_results}=    RW.CLI.Run Cli
-        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Tags"], (.[] | [ .CertificateArn, .DomainName, .Status, .FailureReason, (.Tags | map(.Key + "=" + .Value) | join(",")) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Resource Summary:\\n" $0; else print $0}'\''
-        RW.Core.Add Pre To Report    ${formatted_results.stdout}
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "FailureReason", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, .FailureReason, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        RW.Core.Add To Report    ${formatted_results.stdout}
 
+        ${all_cert_details}=    Set Variable    ${EMPTY}
         FOR    ${item}    IN    @{resource_list}
             ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
-            RW.Core.Add Issue        
-            ...    severity=3
-            ...    expected=ACM certificate `${item['CertificateArn']}` should not be in a FAILED status in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
-            ...    actual=ACM certificate `${item['CertificateArn']}` is in a FAILED status due to: ${item['FailureReason']} in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
-            ...    title=ACM Certificates are in a FAILED status detected in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
-            ...    reproduce_hint=${c7n_output.cmd}
-            ...    details=${pretty_item}
-            ...    next_steps=Investigate and resolve the failure reason for the ACM certificate in AWS Region `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`\nEscalate ACM Certificate Provisioning Issues to Service Owner
+            ${all_cert_details}=    Catenate    SEPARATOR=\n\n    ${all_cert_details}    ${pretty_item}
         END
+        RW.Core.Add Issue        
+        ...    severity=3
+        ...    expected=All ACM certificates should be in a valid status in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    actual=Found ${len} ACM certificates in FAILED status in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    title=Failed ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    reproduce_hint=${c7n_output.cmd}
+        ...    details=${all_cert_details}
+        ...    next_steps=Investigate and resolve the failure reasons for the ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`\nEscalate ACM Certificate Provisioning Issues to Service Owner
     ELSE
         RW.Core.Add Pre To Report    No ACM certificates in failed status found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    END
+
+List Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find pending validation ACM certificates
+    [Tags]    aws    acm    certificate    status
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/pending-validation-certificate.yaml --cache-period 0
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+
+    ${report_data}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/resources.json 
+
+    TRY
+        ${resource_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
+    EXCEPT
+        Log    Failed to load JSON payload, defaulting to empty list.    WARN
+        ${resource_list}=    Create List
+    END
+
+    ${len}    Get length    ${resource_list}
+    
+    IF    ${len} > 0
+        # Format and display results
+        ${formatted_results}=    RW.CLI.Run Cli
+        ...    cmd=jq -r --arg region "${AWS_REGION}" '["CertificateArn", "DomainName", "Status", "Tags", "Link"], (.[] | [ (.CertificateArn | split("/") | .[1]), .DomainName, .Status, (.Tags | map(.Key + "=" + .Value) | join(",")), ("https://" + $region + ".console.aws.amazon.com/acm/home?region=" + $region + "#/certificates/" + (.CertificateArn | split("/") | .[1])) ]) | @tsv' ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/resources.json | column -t | awk '\''{if (NR == 1) print "Certificate Summary:\\n=============================================\\n" $0; else print $0}'\''
+        RW.Core.Add To Report    ${formatted_results.stdout}
+
+        ${all_cert_details}=    Set Variable    ${EMPTY}
+        FOR    ${item}    IN    @{resource_list}
+            ${pretty_item}=    Evaluate    pprint.pformat(${item})    modules=pprint
+            ${all_cert_details}=    Catenate    SEPARATOR=\n\n    ${all_cert_details}    ${pretty_item}
+        END
+        RW.Core.Add Issue        
+        ...    severity=2
+        ...    expected=All ACM certificates should be validated in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    actual=Found ${len} ACM certificates pending validation in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+        ...    title=Pending validation ACM certificates detected in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+        ...    reproduce_hint=${c7n_output.cmd}
+        ...    details=${all_cert_details}
+        ...    next_steps=Complete the validation process for the pending ACM certificates in AWS Region `${AWS_REGION}` and AWS Account `${AWS_ACCOUNT_ID}`
+    ELSE
+        RW.Core.Add Pre To Report    No ACM certificates pending validation found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
 
 
