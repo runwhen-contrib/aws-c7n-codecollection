@@ -1,0 +1,9 @@
+policies:
+  - name: soon-to-expire-certificates
+    resource: acm-certificate
+    filters:
+      - type: value
+        key: NotAfter
+        value_type: expiration
+        op: lt
+        value: {{days}}
