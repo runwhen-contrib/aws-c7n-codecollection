@@ -63,9 +63,20 @@ Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
     ${failed_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_FAILED_CERTIFICATES}) else 0
     Set Global Variable    ${failed_certificate_score}
 
+Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]  Find pending validation ACM certificates
+    [Tags]    aws    acm    certificate    validation
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/pending-validation-certificate.yaml --cache-period 0
+    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
+    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ${count}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
+    ${pending_validation_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_PENDING_VALIDATION_CERTIFICATES}) else 0
+    Set Global Variable    ${pending_validation_score}
 
 Generate Health Score
-    ${health_score}=      Evaluate  (${unused_certificate_score} + ${expiring_certificate_score} + ${expired_certificate_score} + ${failed_certificate_score}) / 4
+    ${health_score}=      Evaluate  (${unused_certificate_score} + ${expiring_certificate_score} + ${expired_certificate_score} + ${failed_certificate_score} + ${pending_validation_score}) / 5
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
 
@@ -111,6 +122,12 @@ Suite Initialization
     ...    pattern=^\d+$
     ...    example=2
     ...    default=0
+    ${MAX_PENDING_VALIDATION_CERTIFICATES}=    RW.Core.Import User Variable    MAX_PENDING_VALIDATION_CERTIFICATES
+    ...    type=string
+    ...    description=The maximum number of pending validation ACM certificates to consider healthy
+    ...    pattern=^\d+$
+    ...    example=2
+    ...    default=0
     ${CERT_EXPIRY_DAYS}=    RW.Core.Import User Variable    CERT_EXPIRY_DAYS
     ...    type=string
     ...    description=Number of days before ACM certificate expiry to raise a issue
@@ -125,5 +142,6 @@ Suite Initialization
     Set Suite Variable    ${MAX_FAILED_CERTIFICATES}    ${MAX_FAILED_CERTIFICATES}
     Set Suite Variable    ${MAX_EXPIRING_CERTIFICATES}    ${MAX_EXPIRING_CERTIFICATES}
     Set Suite Variable    ${MAX_EXPIRED_CERTIFICATES}    ${MAX_EXPIRED_CERTIFICATES}
+    Set Suite Variable    ${MAX_PENDING_VALIDATION_CERTIFICATES}    ${MAX_PENDING_VALIDATION_CERTIFICATES}
     Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
     Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
