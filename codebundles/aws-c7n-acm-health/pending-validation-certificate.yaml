@@ -1,0 +1,7 @@
+policies:
+  - name: pending-validation-certificate
+    resource: acm-certificate
+    filters:
+      - type: value
+        key: Status
+        value: PENDING_VALIDATION
