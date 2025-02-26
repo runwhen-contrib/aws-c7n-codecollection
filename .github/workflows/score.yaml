@@ -8,7 +8,8 @@ on:
       - "!src/VERSION"
 
 permissions:
-    contents: 'write'
+  contents: write
+  pull-requests: write
 
 jobs:
   score-codebundles:
@@ -30,7 +31,7 @@ jobs:
           apply_suggestions: 'true'
           commit_changes: 'true'
           open_pr: 'true'
-          pr_branch: 'auto-code-updates'
-          base_branch: 'main'
+          pr_branch: "auto-code-updates-${{ github.run_number }}"
+          base_branch: "main"
         env:
           GH_TOKEN: ${{ github.token }}
