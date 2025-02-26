@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for Unencrypted RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unencrypted RDS instances
     [Tags]    aws    rds    database    encryption 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -49,7 +49,7 @@ Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS acc
     Set Global Variable    ${backup_disabled_rds_score}
 
 
-Generate Health Score
+Generate Health Score for RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     ${health_score}=      Evaluate  (${unencrypted_rds_score} + ${publicly_accessible_rds_score} + ${backup_disabled_rds_score}) / 3
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}

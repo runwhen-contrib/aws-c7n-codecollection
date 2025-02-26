@@ -66,7 +66,7 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
         RW.Core.Add Pre To Report     ${ec2_instances_list_length} stale instances found, below threshold of ${MAX_ALLOWED_STALE_INSTANCES}\n${report_data.stdout}
     END
 
-List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+List stopped EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` - Compute, EC2, AWS 
     [Documentation]  List stopped EC2 instances in AWS Region. 
     [Tags]    ec2    instance    aws    compute
 
