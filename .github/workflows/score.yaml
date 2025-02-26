@@ -31,7 +31,7 @@ jobs:
           apply_suggestions: true
           commit_changes: true
           open_pr: true
-          pr_branch: auto-code-updates-${{ github.run_number }}
+          pr_branch: "auto-code-updates-${{ github.run_id }}"
           base_branch: main
         env:
           GH_TOKEN: ${{ github.token }}
