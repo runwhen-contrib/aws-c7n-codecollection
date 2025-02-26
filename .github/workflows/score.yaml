@@ -25,7 +25,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - uses: runwhen-contrib/github-actions/codecollection-score@feat/lint-task-access
+      - uses: runwhen-contrib/github-actions/codecollection-score@main
         with:
           directory: ./codebundles
           apply_suggestions: true
