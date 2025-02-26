@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Check CloudWatch Log Groups without retention period
     [Tags]    aws    cloudwatch    logs
     ${c7n_output}=    RW.CLI.Run Cli
@@ -24,7 +24,7 @@ Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION
     ${no_retention_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_LOG_GROUPS_ALLOWED}) else 0
     Set Global Variable    ${no_retention_score}
 
-Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` and provide status
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail    logs
     ${c7n_output}=    RW.CLI.Run Cli
@@ -69,7 +69,7 @@ Check if CloudTrail exists and is configured for multi-region in AWS Region `${A
     END
 
 Check CloudTrail Without CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-    [Documentation]    Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+    [Documentation]    Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` and provide status
     [Tags]    aws    cloudtrail    cloudwatch    logs
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/trail-without-cloudwatch-logs.yaml --cache-period 0
@@ -89,7 +89,7 @@ Check CloudTrail Without CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Ac
     ${cloudtrail_trails_without_cloudwatch_score}=    Evaluate    1 if len(@{trails_without_cloudwatch}) <= int(${MAX_CLOUDTRAIL_TRAILS_WITHOUT_CLOUDWATCH_LOGS_ALLOWED}) else 0
     Set Global Variable    ${cloudtrail_trails_without_cloudwatch_score}
 
-Generate Health Score
+Generate Health Score based on AWS CloudTrail, CloudWatch, and Logs in AWS Region `$${AWS_REGION}` in AWS Account `$${AWS_ACCOUNT_ID}`
     ${health_score}=      Evaluate  (${no_retention_score} + ${cloudtrail_score} + ${cloudtrail_trails_without_cloudwatch_score}) / 3 
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}

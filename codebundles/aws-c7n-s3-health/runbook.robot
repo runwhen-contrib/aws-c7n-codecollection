@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
+List S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}` in Region `${AWS_REGION}`
     [Documentation]  Fetch total number of S3 buckets with public access enabled and raises an issue if any exist.  
     [Tags]    s3    storage    aws    security
     ${c7n_output}=    RW.CLI.Run Cli

@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List Unused ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+List Unused ACM Certificates expiring in next `${CERT_EXPIRY_DAYS}` days in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused ACM certificates
     [Tags]    aws    acm    certificate    security 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -102,7 +102,7 @@ List Expiring ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${A
         RW.Core.Add Pre To Report    No ACM certificates nearing expiration found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
 
-List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}` within the Last ${CERT_EXPIRY_DAYS} Days
     [Documentation]  Find expired ACM certificates
     [Tags]    aws    acm    certificate    expiration
     ${c7n_output}=    RW.CLI.Run Cli
@@ -144,7 +144,7 @@ List Expired ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AW
         RW.Core.Add Pre To Report    No expired ACM certificates found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     END
 
-List Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+List Certificates with Failed Status in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find failed status ACM certificates
     [Tags]    aws    acm    certificate    status
     ${c7n_output}=    RW.CLI.Run Cli

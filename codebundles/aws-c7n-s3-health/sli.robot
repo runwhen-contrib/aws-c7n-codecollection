@@ -11,7 +11,7 @@ Library    RW.CLI
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Count S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
+Fetch Total Number of S3 Buckets with Public Access Enabled in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Fetch total number of S3 buckets with public access enabled.    
     [Tags]    s3    storage    aws    security
     ${c7n_output}=    RW.CLI.Run Cli

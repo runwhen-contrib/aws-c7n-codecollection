@@ -23,7 +23,7 @@ Check Unattached EBS Volumes in `${AWS_REGION}`
     ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unattached_ebs_event_score}
 
-Check Unencrypted EBS Volumes in `${AWS_REGION}`
+Check Unencrypted EBS Volumes in `${AWS_REGION}` for AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Check for unencrypted EBS volumes and report any found that do not meet encryption requirements.
     [Tags]    ebs    storage    aws    security    volume
     ${c7n_output}=    RW.CLI.Run Cli
@@ -36,7 +36,7 @@ Check Unencrypted EBS Volumes in `${AWS_REGION}`
     Set Global Variable    ${unencrypted_ebs_event_score}
 
 
-Check Unused EBS Snapshots in `${AWS_REGION}`
+Check for Unused EBS Snapshots with No Associated Volume in ${AWS_REGION}
     [Documentation]  Check for unused EBS snapshots. 
     [Tags]    ebs    storage    aws    snapshots    volume
     ${c7n_output}=    RW.CLI.Run Cli
@@ -49,7 +49,7 @@ Check Unused EBS Snapshots in `${AWS_REGION}`
     Set Global Variable    ${unsued_ebs_snapshot_event_score}
 
 
-Generate EBS Score
+Generate EBS Score in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     ${ebs_health_score}=      Evaluate  (${unattached_ebs_event_score} + ${unencrypted_ebs_event_score} + ${unsued_ebs_snapshot_event_score}) / 3
     ${health_score}=      Convert to Number    ${ebs_health_score}  2
     RW.Core.Push Metric    ${health_score}

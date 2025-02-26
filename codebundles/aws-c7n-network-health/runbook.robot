@@ -13,7 +13,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_ID}` 
+List Publicly Accessible Security Groups in AWS Account ${AWS_ACCOUNT_ID} 
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
     [Tags]    tag    aws    security-group    network 
     CloudCustodian.Core.Generate Policy   
@@ -55,7 +55,7 @@ List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
+List unused Elastic IPs in AWS region `${AWS_REGION}` within AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
     [Tags]    aws    eip    network 
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
@@ -96,7 +96,7 @@ List unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
+List unused ALBs and NLBs in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets
     [Tags]    aws    elb    network
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
@@ -137,7 +137,7 @@ List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List VPCs with Flow Logs Disabled in AWS account `${AWS_ACCOUNT_ID}`
+List VPCs with Flow Logs Disabled in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find VPCs that do not have flow logs enabled
     [Tags]    aws    vpc    network
     CloudCustodian.Core.Generate Policy   
