@@ -17,5 +17,9 @@ spec:
   - {{workspace.owner_email}}
   statement: The total count of unhealthy or insecure S3 buckets should be 0.   
   additionalContext:
-    region: "{{match_resource.resource.region}}"
-    account_id: "{{match_resource.resource.account_id}}"
+    {% include "aws-hierarchy.yaml" ignore missing %}
+    qualified_name: "{{ match_resource.qualified_name }}"
+  tags: 
+    {% include "aws-tags.yaml" ignore missing %}
+    - name: access
+      value: read-only
