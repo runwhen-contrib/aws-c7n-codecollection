@@ -18,7 +18,7 @@ spec:
   statement: Identify RDS instances that are unencrypted, publicly accessible, or have backups disabled
   additionalContext:
     {% include "aws-hierarchy.yaml" ignore missing %}
-    qualified_name: "{{ match_resource.qualified_name }}"
+    qualified_name: "{{ match_resource.qualified_name | replace(":", "_") }}"
   tags: 
     {% include "aws-tags.yaml" ignore missing %}
     - name: access

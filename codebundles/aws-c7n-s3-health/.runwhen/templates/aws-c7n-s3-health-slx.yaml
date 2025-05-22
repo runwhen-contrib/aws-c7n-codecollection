@@ -18,7 +18,7 @@ spec:
   statement: The total count of unhealthy or insecure S3 buckets should be 0.   
   additionalContext:
     {% include "aws-hierarchy.yaml" ignore missing %}
-    qualified_name: "{{ match_resource.qualified_name }}"
+    qualified_name: "{{ match_resource.qualified_name | replace(":", "_") }}"
   tags: 
     {% include "aws-tags.yaml" ignore missing %}
     - name: access

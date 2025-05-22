@@ -18,7 +18,7 @@ spec:
   statement: Identify publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in the AWS account {{match_resource.resource.account_id}}
   additionalContext:
     {% include "aws-hierarchy.yaml" ignore missing %}
-    qualified_name: "{{ match_resource.qualified_name }}"
+    qualified_name: "{{ match_resource.qualified_name | replace(":", "_") }}"
   tags: 
     {% include "aws-tags.yaml" ignore missing %}
     - name: access
