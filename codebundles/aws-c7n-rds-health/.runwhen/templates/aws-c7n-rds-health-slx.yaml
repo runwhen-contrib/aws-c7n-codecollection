@@ -17,5 +17,9 @@ spec:
   - {{workspace.owner_email}}
   statement: Identify RDS instances that are unencrypted, publicly accessible, or have backups disabled
   additionalContext:
-    region: "{{match_resource.resource.region}}"
-    account_id: "{{match_resource.resource.account_id}}"
+    {% include "aws-hierarchy.yaml" ignore missing %}
+    qualified_name: "{{ match_resource.qualified_name }}"
+  tags: 
+    {% include "aws-tags.yaml" ignore missing %}
+    - name: access
+      value: read-only
