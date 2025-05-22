@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List Unencrypted RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Improve: List Unencrypted RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unencrypted RDS instances
     [Tags]    aws    rds    database    encryption 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -50,7 +50,7 @@ List Unencrypted RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${A
     END
 
 
-List Publicly Accessible RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Improve: List Publicly Accessible RDS Instances in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible RDS instances
     [Tags]    aws    rds    database    security 
     ${c7n_output}=    RW.CLI.Run Cli
@@ -87,7 +87,7 @@ List Publicly Accessible RDS Instances in AWS Region `${AWS_REGION}` in AWS Acco
         END
     END
 
-List RDS Instances with Backups Disabled in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Improve: List RDS Instances with Backups Disabled in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Identify RDS instances with backups disabled
     [Tags]    aws    rds    database    backups 
     ${c7n_output}=    RW.CLI.Run Cli

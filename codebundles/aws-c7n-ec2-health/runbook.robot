@@ -13,9 +13,9 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+Improve: List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  List stale EC2 instances in AWS Region. 
-    [Tags]    ec2    instance    aws    compute    stale    
+    [Tags]    ec2    instance    aws    compute    stale        access:read-only
 
     # Generate the Cloud Custodian policy
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -66,9 +66,9 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
         RW.Core.Add Pre To Report     ${ec2_instances_list_length} stale instances found, below threshold of ${MAX_ALLOWED_STALE_INSTANCES}\n${report_data.stdout}
     END
 
-List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+Improve: List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  List stopped EC2 instances in AWS Region. 
-    [Tags]    ec2    instance    aws    compute
+    [Tags]    ec2    instance    aws    compute    access:read-only
 
     # Generate the Cloud Custodian policy
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -120,9 +120,9 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
         RW.Core.Add Pre To Report    ${ec2_instances_list_length} stopped instances found, below threshold of ${MAX_ALLOWED_STOPPED_INSTANCES}\n${report_data.stdout}
     END
 
-List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account ${AWS_ACCOUNT_ID}
+Improve: List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account ${AWS_ACCOUNT_ID}
     [Documentation]  List invalid Auto Scaling Groups
-    [Tags]    asg    aws    compute    asg
+    [Tags]    asg    aws    compute    asg    access:read-only
 
     # Run the Cloud Custodian policy
     ${c7n_output}=    RW.CLI.Run Cli

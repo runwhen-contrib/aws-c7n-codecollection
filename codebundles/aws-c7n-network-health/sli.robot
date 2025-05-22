@@ -13,7 +13,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
+Improve: Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
     [Tags]    aws    security-group    network
     CloudCustodian.Core.Generate Policy   
@@ -33,7 +33,7 @@ Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     Set Global Variable    ${public_ip_access_score}
 
 
-Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
+Improve: Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
     [Tags]    aws    eip    network 
     ${total_count}=    Set Variable    0
@@ -49,7 +49,7 @@ Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
     ${unattached_eip_score}=    Evaluate    1 if ${total_count} <= int(${MAX_ALLOWED_UNUSED_RESOURCES}) else 0
     Set Global Variable    ${unattached_eip_score}
 
-Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
+Improve: Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets
     [Tags]    aws    elb    network 
     ${total_count}=    Set Variable    0
@@ -65,7 +65,7 @@ Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
     ${unused_elb_score}=    Evaluate    1 if ${total_count} <= int(${MAX_ALLOWED_UNUSED_RESOURCES}) else 0
     Set Global Variable    ${unused_elb_score}
 
-Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
+Improve: Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find VPCs that do not have Flow Logs enabled
     [Tags]    aws    vpc    network 
     CloudCustodian.Core.Generate Policy   
@@ -84,7 +84,7 @@ Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
     ${flow_log_disabled_vpc_score}=    Evaluate    1 if ${total_count} <= int(${DISABLED_FLOW_LOG_THRESHOLD}) else 0
     Set Global Variable    ${flow_log_disabled_vpc_score}
 
-Generate Health Score
+Improve: Generate Health Score
     ${health_score}=      Evaluate  (${public_ip_access_score} + ${unattached_eip_score} + ${unused_elb_score} + ${flow_log_disabled_vpc_score}) / 4
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}

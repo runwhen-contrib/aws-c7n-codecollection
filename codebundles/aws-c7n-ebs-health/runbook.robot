@@ -14,7 +14,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+Improve: List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  Check for unattached EBS volumes in the specified region. 
     [Tags]    ebs    storage    aws    volume    unattached
     ${c7n_output}=    RW.CLI.Run Cli
@@ -52,7 +52,7 @@ List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_
     END
 
 
-List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Improve: List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Check for Unencrypted EBS Volumes in the specified region. 
     [Tags]    ebs    storage    aws    volume    encryption
     ${c7n_output}=    RW.CLI.Run Cli
@@ -90,7 +90,7 @@ List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS
     END
 
 
-List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Improve: List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Check for Unused EBS Snapshots in the specified region. 
     [Tags]    ebs    storage    aws    volume    unused
     ${c7n_output}=    RW.CLI.Run Cli
