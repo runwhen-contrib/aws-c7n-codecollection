@@ -1,0 +1,15 @@
+policies:
+  - name: service-usage
+    description: AWS services usage stats 
+    resource: aws.service-quota
+    {%- if resource_providers %}
+    query:
+      - include_service_codes:
+          {%- for provider in resource_providers.split(',') %}
+          - {{ provider.strip('"').strip("'").strip() }}
+          {%- endfor %}
+    {%- endif %}
+    filters:
+      - UsageMetric: present
+      - type: usage-metric
+        limit: {{ usage_percent }}
