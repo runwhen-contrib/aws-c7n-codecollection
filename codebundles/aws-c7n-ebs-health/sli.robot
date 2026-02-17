@@ -13,11 +13,10 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 Check Unattached EBS Volumes in `${AWS_REGION}`
     [Documentation]  Check for unattached EBS volumes in the specified region. 
-    [Tags]    ebs    storage    aws    volume
+    [Tags]    ebs    storage    aws    volume    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unattached-ebs-volumes.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unattached-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     ${unattached_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
@@ -25,11 +24,10 @@ Check Unattached EBS Volumes in `${AWS_REGION}`
 
 Check Unencrypted EBS Volumes in `${AWS_REGION}`
     [Documentation]  Check for unencrypted EBS volumes and report any found that do not meet encryption requirements.
-    [Tags]    ebs    storage    aws    security    volume
+    [Tags]    ebs    storage    aws    security    volume    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unencrypted-ebs-volumes.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unencrypted-ebs-volumes/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     ${unencrypted_ebs_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${SECURITY_EVENT_THRESHOLD}) else 0
@@ -38,11 +36,10 @@ Check Unencrypted EBS Volumes in `${AWS_REGION}`
 
 Check Unused EBS Snapshots in `${AWS_REGION}`
     [Documentation]  Check for unused EBS snapshots. 
-    [Tags]    ebs    storage    aws    snapshots    volume
+    [Tags]    ebs    storage    aws    snapshots    volume    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ebs-health ${CURDIR}/unused-ebs-snapshots.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-ebs-health/unused-ebs-snapshots/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
     ${unsued_ebs_snapshot_event_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
@@ -64,13 +61,9 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
-    ${AWS_ACCESS_KEY_ID}=    RW.Core.Import Secret   AWS_ACCESS_KEY_ID
+    ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
-    ...    description=AWS Access Key ID
-    ...    pattern=\w*
-    ${AWS_SECRET_ACCESS_KEY}=    RW.Core.Import Secret   AWS_SECRET_ACCESS_KEY
-    ...    type=string
-    ...    description=AWS Access Key Secret
+    ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
     ${EVENT_THRESHOLD}=    RW.Core.Import User Variable    EVENT_THRESHOLD
     ...    type=string
@@ -89,5 +82,9 @@ Suite Initialization
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
     Set Suite Variable    ${SECURITY_EVENT_THRESHOLD}    ${SECURITY_EVENT_THRESHOLD}
-    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
-    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${aws_credentials}    ${aws_credentials}
+    # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
+    # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).
+    Set Suite Variable
+    ...    &{env}
+    ...    AWS_REGION=${AWS_REGION}

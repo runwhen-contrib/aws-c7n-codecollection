@@ -14,11 +14,10 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  List CloudWatch Log Groups Without Retention Period
-    [Tags]    aws    cloudwatch    logs
+    [Tags]    aws    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/log-groups-no-retention.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     ${report_data}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-monitoring-health/log-groups-no-retention/resources.json 
@@ -54,11 +53,10 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
 
 Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
-    [Tags]    aws    cloudtrail
+    [Tags]    aws    cloudtrail    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/list-trail.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     ${report_data}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-monitoring-health/list-cloudtrail-trails/resources.json
@@ -86,8 +84,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
         # Check for multi-region trails
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/trail-no-multi-region.yaml --cache-period 0
-        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+        ...    env=${env}
 
         ${report_data}=     RW.CLI.Run Cli
         ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-monitoring-health/trail-no-multi-region/resources.json
@@ -120,11 +117,10 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
 
  Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]    Check for CloudTrail integration with CloudWatch Logs
-    [Tags]    aws    cloudtrail    cloudwatch    logs
+    [Tags]    aws    cloudtrail    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/trail-without-cloudwatch-logs.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     ${report_data}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-monitoring-health/trail-without-cloudwatch-logs/resources.json
@@ -164,16 +160,16 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
-    ${AWS_ACCESS_KEY_ID}=    RW.Core.Import Secret   AWS_ACCESS_KEY_ID
+    ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
-    ...    description=AWS Access Key ID
-    ...    pattern=\w*
-    ${AWS_SECRET_ACCESS_KEY}=    RW.Core.Import Secret   AWS_SECRET_ACCESS_KEY
-    ...    type=string
-    ...    description=AWS Access Key Secret
+    ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-monitoring-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
-    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
-    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY} 
+    Set Suite Variable    ${aws_credentials}    ${aws_credentials}
+    # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
+    # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).
+    Set Suite Variable
+    ...    &{env}
+    ...    AWS_REGION=${AWS_REGION}

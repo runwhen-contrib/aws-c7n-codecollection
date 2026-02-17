@@ -15,7 +15,7 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
-    [Tags]    aws    security-group    network
+    [Tags]    aws    security-group    network    data:config
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/insecure-sg-ingress.j2    
     ...    tags=${AWS_SECURITY_GROUP_TAGS}
@@ -23,8 +23,7 @@ Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/insecure-sg-ingress.yaml --cache-period 0
-        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
         ${count}=     RW.CLI.Run Cli
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/insecure-sg-ingress/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
@@ -35,13 +34,12 @@ Check for publicly accessible security groups in AWS account `${AWS_ACCOUNT_ID}`
 
 Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
-    [Tags]    aws    eip    network 
+    [Tags]    aws    eip    network    data:config
     ${total_count}=    Set Variable    0
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/unused-eip.yaml --cache-period 0
-        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
         ${count}=     RW.CLI.Run Cli
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-eip/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
@@ -51,13 +49,12 @@ Check for unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
 
 Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets
-    [Tags]    aws    elb    network 
+    [Tags]    aws    elb    network    data:config
     ${total_count}=    Set Variable    0
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/unused-elb.yaml --cache-period 0
-        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
         ${count}=     RW.CLI.Run Cli
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/unused-elb/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
@@ -67,7 +64,7 @@ Check for unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
 
 Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find VPCs that do not have Flow Logs enabled
-    [Tags]    aws    vpc    network 
+    [Tags]    aws    vpc    network    data:config
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/flow-log-disabled-vpc.j2    
     ...    tags=${AWS_VPC_TAGS}
@@ -75,8 +72,7 @@ Check for VPCs with Flow Logs disabled in AWS account `${AWS_ACCOUNT_ID}`
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
         ${c7n_output}=    RW.CLI.Run Cli
         ...    cmd=custodian run -r ${region} --output-dir ${OUTPUT_DIR}/${region}/aws-c7n-network-health ${CURDIR}/flow-log-disabled-vpc.yaml --cache-period 0
-        ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-        ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
         ${count}=     RW.CLI.Run Cli
         ...    cmd=cat ${OUTPUT_DIR}/${region}/aws-c7n-network-health/flow-log-disabled-vpc/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
         ${total_count}=    Evaluate    ${total_count} + int(${count.stdout})
@@ -99,13 +95,9 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
-    ${AWS_ACCESS_KEY_ID}=    RW.Core.Import Secret   AWS_ACCESS_KEY_ID
+    ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
-    ...    description=AWS Access Key ID
-    ...    pattern=\w*
-    ${AWS_SECRET_ACCESS_KEY}=    RW.Core.Import Secret   AWS_SECRET_ACCESS_KEY
-    ...    type=string
-    ...    description=AWS Access Key Secret
+    ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
     ${UNSECURED_SG_THRESHOLD}=    RW.Core.Import User Variable    UNSECURED_SG_THRESHOLD
     ...    type=string
@@ -138,10 +130,14 @@ Suite Initialization
     ...    example="Name,Environment=prod"
     ...    default="Name"
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-network-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
+    # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
+    # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).
+    Set Suite Variable
+    ...    &{env}
+    ...    AWS_REGION=${AWS_REGION}
     ${AWS_ENABLED_REGIONS}=    RW.CLI.Run Cli
     ...    cmd=aws ec2 describe-regions --region ${AWS_REGION} --query 'Regions[*].RegionName' --output json
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${AWS_ENABLED_REGIONS}=    Evaluate    json.loads(r'''${AWS_ENABLED_REGIONS.stdout}''')    json
     Set Suite Variable    ${AWS_ENABLED_REGIONS}    ${AWS_ENABLED_REGIONS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
@@ -149,7 +145,6 @@ Suite Initialization
     Set Suite Variable    ${AWS_VPC_TAGS}    ${AWS_VPC_TAGS}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${UNSECURED_SG_THRESHOLD}    ${UNSECURED_SG_THRESHOLD}
-    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
-    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${aws_credentials}    ${aws_credentials}
     Set Suite Variable    ${DISABLED_FLOW_LOG_THRESHOLD}    ${DISABLED_FLOW_LOG_THRESHOLD}
     Set Suite Variable    ${MAX_ALLOWED_UNUSED_RESOURCES}    ${MAX_ALLOWED_UNUSED_RESOURCES}

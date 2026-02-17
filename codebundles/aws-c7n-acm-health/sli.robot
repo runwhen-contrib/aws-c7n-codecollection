@@ -14,11 +14,10 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find unused ACM certificates
-    [Tags]    aws    acm    certificate    security 
+    [Tags]    aws    acm    certificate    security    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/unused-certificate.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/unused-certificate/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
     ${unused_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_UNUSED_CERTIFICATES}) else 0
@@ -26,14 +25,13 @@ Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `
 
 Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find Expiring ACM certificates
-    [Tags]    aws    acm    certificate    expiration 
+    [Tags]    aws    acm    certificate    expiration    data:config
     CloudCustodian.Core.Generate Policy   
     ...    ${CURDIR}/soon-to-expire-certificates.j2
     ...    days=${CERT_EXPIRY_DAYS}
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/soon-to-expire-certificates.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/soon-to-expire-certificates/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
     ${expiring_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRING_CERTIFICATES}) else 0
@@ -41,11 +39,10 @@ Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account
 
 Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find expired ACM certificates
-    [Tags]    aws    acm    certificate    expiration
+    [Tags]    aws    acm    certificate    expiration    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/expired-certificate.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/expired-certificate/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
     ${expired_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRED_CERTIFICATES}) else 0
@@ -53,11 +50,10 @@ Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account 
 
 Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find failed status ACM certificates
-    [Tags]    aws    acm    certificate    status
+    [Tags]    aws    acm    certificate    status    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/failed-status-certificate.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/failed-status-certificate/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
     ${failed_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_FAILED_CERTIFICATES}) else 0
@@ -65,11 +61,10 @@ Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
 
 Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
     [Documentation]  Find pending validation ACM certificates
-    [Tags]    aws    acm    certificate    validation
+    [Tags]    aws    acm    certificate    validation    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-acm-health ${CURDIR}/pending-validation-certificate.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-acm-health/pending-validation-certificate/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value';
     ${pending_validation_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_PENDING_VALIDATION_CERTIFICATES}) else 0
@@ -90,13 +85,9 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
-    ${AWS_ACCESS_KEY_ID}=    RW.Core.Import Secret   AWS_ACCESS_KEY_ID
+    ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
-    ...    description=AWS Access Key ID
-    ...    pattern=\w*
-    ${AWS_SECRET_ACCESS_KEY}=    RW.Core.Import Secret   AWS_SECRET_ACCESS_KEY
-    ...    type=string
-    ...    description=AWS Access Key Secret
+    ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
     ${MAX_UNUSED_CERTIFICATES}=    RW.Core.Import User Variable    MAX_UNUSED_CERTIFICATES
     ...    type=string
@@ -143,5 +134,9 @@ Suite Initialization
     Set Suite Variable    ${MAX_EXPIRING_CERTIFICATES}    ${MAX_EXPIRING_CERTIFICATES}
     Set Suite Variable    ${MAX_EXPIRED_CERTIFICATES}    ${MAX_EXPIRED_CERTIFICATES}
     Set Suite Variable    ${MAX_PENDING_VALIDATION_CERTIFICATES}    ${MAX_PENDING_VALIDATION_CERTIFICATES}
-    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
-    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${aws_credentials}    ${aws_credentials}
+    # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
+    # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).
+    Set Suite Variable
+    ...    &{env}
+    ...    AWS_REGION=${AWS_REGION}
