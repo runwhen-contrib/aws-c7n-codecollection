@@ -40,10 +40,7 @@ spec:
     - name: MAX_ALLOWED_STALE_INSTANCES
       value: '0'
   secretsProvided:
-    - name: AWS_ACCESS_KEY_ID
-      workspaceKey: {{custom.aws_access_key_id}}
-    - name: AWS_SECRET_ACCESS_KEY
-      workspaceKey: {{custom.aws_secret_access_key}}
+    {% include "aws-auth.yaml" ignore missing %}
   alerts:
     warning:
       operator: <

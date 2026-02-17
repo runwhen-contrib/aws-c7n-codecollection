@@ -27,7 +27,4 @@ spec:
     - name: AWS_ACCOUNT_ID
       value: "{{match_resource.resource.account_id}}"
   secretsProvided:
-    - name: AWS_ACCESS_KEY_ID
-      workspaceKey: {{custom.aws_access_key_id}}
-    - name: AWS_SECRET_ACCESS_KEY
-      workspaceKey: {{custom.aws_secret_access_key}}
+    {% include "aws-auth.yaml" ignore missing %}

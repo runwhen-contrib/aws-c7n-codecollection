@@ -15,7 +15,7 @@ Suite Setup    Suite Initialization
 *** Tasks ***
 List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  List stale EC2 instances in AWS Region. 
-    [Tags]    ec2    instance    aws    compute    stale    
+    [Tags]    ec2    instance    aws    compute    stale    data:config
 
     # Generate the Cloud Custodian policy
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -26,8 +26,7 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
     # Run the Cloud Custodian policy
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ec2-health ${CURDIR}/stale-ec2-instances.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     # Read the generated report data
     ${report_data}=     RW.CLI.Run Cli
@@ -68,19 +67,18 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
 
 List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
     [Documentation]  List stopped EC2 instances in AWS Region. 
-    [Tags]    ec2    instance    aws    compute
-
+    [Tags]    ec2    instance    aws    compute    data:config
+    
     # Generate the Cloud Custodian policy
     ${result}=    CloudCustodian.Core.Generate Policy   
-    ...    ${CURDIR}/stopped-ec2-instances.j2    
+    ...    ${CURDIR}/stopped-ec2-instances.j2
     ...    days=${AWS_EC2_AGE}  
     ...    tags=${AWS_EC2_TAGS}
 
     # Run the Cloud Custodian policy
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ec2-health ${CURDIR}/stopped-ec2-instances.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     ${parsed_results}=    CloudCustodian.Core.Parse Custodian Results
     ...    input_dir=${OUTPUT_DIR}/aws-c7n-ec2-health/stopped-ec2-instances
@@ -122,13 +120,12 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
 
 List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account ${AWS_ACCOUNT_ID}
     [Documentation]  List invalid Auto Scaling Groups
-    [Tags]    asg    aws    compute    asg
+    [Tags]    asg    aws    compute    asg    data:config
 
     # Run the Cloud Custodian policy
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-ec2-health ${CURDIR}/invalid-asg.yaml --cache-period 0
-    ...    secret__aws_access_key_id=${AWS_ACCESS_KEY_ID}
-    ...    secret__aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    ...    env=${env}
 
     # Read the generated report data
     ${report_data}=     RW.CLI.Run Cli
@@ -200,13 +197,9 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
-    ${AWS_ACCESS_KEY_ID}=    RW.Core.Import Secret   AWS_ACCESS_KEY_ID
+    ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
-    ...    description=AWS Access Key ID
-    ...    pattern=\w*
-    ${AWS_SECRET_ACCESS_KEY}=    RW.Core.Import Secret   AWS_SECRET_ACCESS_KEY
-    ...    type=string
-    ...    description=AWS Access Key Secret
+    ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
     ${MAX_ALLOWED_STOPPED_INSTANCES}=    RW.Core.Import User Variable    MAX_ALLOWED_STOPPED_INSTANCES
     ...    type=string
@@ -246,5 +239,9 @@ Suite Initialization
     Set Suite Variable    ${MAX_ALLOWED_STOPPED_INSTANCES}    ${MAX_ALLOWED_STOPPED_INSTANCES}
     Set Suite Variable    ${MAX_ALLOWED_STALE_INSTANCES}    ${MAX_ALLOWED_STALE_INSTANCES}
     Set Suite Variable    ${MAX_ALLOWED_INVALID_ASG}    ${MAX_ALLOWED_INVALID_ASG}
-    Set Suite Variable    ${AWS_ACCESS_KEY_ID}    ${AWS_ACCESS_KEY_ID}
-    Set Suite Variable    ${AWS_SECRET_ACCESS_KEY}    ${AWS_SECRET_ACCESS_KEY}
+    Set Suite Variable    ${aws_credentials}    ${aws_credentials}
+    # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
+    # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).
+    Set Suite Variable
+    ...    &{env}
+    ...    AWS_REGION=${AWS_REGION}
