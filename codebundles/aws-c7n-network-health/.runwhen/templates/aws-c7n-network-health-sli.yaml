@@ -16,7 +16,7 @@ spec:
     {% if repo_url %}
     repoUrl: {{repo_url}}
     {% else %}
-    repoUrl: https://github.com/runwhen-contrib/rw-c7n-codecollection.git
+    repoUrl: https://github.com/runwhen-contrib/aws-c7n-codecollection.git
     {% endif %}
     {% if ref %}
     ref: {{ref}}

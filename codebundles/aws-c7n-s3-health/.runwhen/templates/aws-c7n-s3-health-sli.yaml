@@ -16,14 +16,14 @@ spec:
     {% if repo_url %}
     repoUrl: {{repo_url}}
     {% else %}
-    repoUrl: https://github.com/runwhen-contrib/rw-c7n-codecollection.git
+    repoUrl: https://github.com/runwhen-contrib/aws-c7n-codecollection.git
     {% endif %}
     {% if ref %}
     ref: {{ref}}
     {% else %}
     ref: main
     {% endif %}
-    pathToRobot: codebundles/aws-c7n-d3-health/sli.robot
+    pathToRobot: codebundles/aws-c7n-s3-health/sli.robot
   intervalStrategy: intermezzo
   intervalSeconds: 600
   configProvided:
