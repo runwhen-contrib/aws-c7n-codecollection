@@ -10,13 +10,16 @@
         "-p",
         "3000:3000",
         "--name",
-        "rw-c7n-codecollection"
+        "mycodecollection"
     ],
     "forwardPorts": [
         3000
     ],
     "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/sshd:1": {
+            "version": "latest"
+        }
     },
     "workspaceFolder": "/home/runwhen/codecollection/",
     // Configure tool-specific properties.
