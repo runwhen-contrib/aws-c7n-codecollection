@@ -8,8 +8,8 @@ metadata:
     {% include "common-annotations.yaml" %}
 spec:
   imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Database/Res_Amazon-Aurora_Amazon-RDS-Instance_48.svg
-  alias: AWS RDS Health For Region {{match_resource.resource.region}} in Account {{match_resource.resource.account_id}}
-  asMeasuredBy: RDS instance configuration issues (unencrypted, publicly accessible, or have backups disabled) in region {{match_resource.resource.region}} and account {{match_resource.resource.account_id}}
+  alias: AWS RDS Health For Region {{match_resource.resource.region}} in Account {{match_resource.account_name}}
+  asMeasuredBy: RDS instance configuration issues (unencrypted, publicly accessible, or have backups disabled) in region {{match_resource.resource.region}} and account {{match_resource.account_name}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER

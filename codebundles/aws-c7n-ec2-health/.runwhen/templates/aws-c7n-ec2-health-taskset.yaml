@@ -26,6 +26,8 @@ spec:
       value: "{{match_resource.resource.region}}"
     - name: AWS_ACCOUNT_ID
       value: "{{match_resource.resource.account_id}}"
+    - name: AWS_ACCOUNT_NAME
+      value: "{{match_resource.account_name}}"
     - name: AWS_EC2_AGE
       value: '60'
     - name: AWS_EC2_TAGS

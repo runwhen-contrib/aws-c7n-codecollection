@@ -11,7 +11,7 @@ spec:
   displayUnitsShort: ok
   locations:
       - {{default_location}}
-  description: Score Network Health (1 = Healthy, 0 = Unhealty) by identifying publicly accessible security groups, unused Elastic IPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.resource.account_id}}
+  description: Score Network Health (1 = Healthy, 0 = Unhealty) by identifying publicly accessible security groups, unused Elastic IPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.account_name}}
   codeBundle:
     {% if repo_url %}
     repoUrl: {{repo_url}}
@@ -31,6 +31,8 @@ spec:
       value: "{{match_resource.resource.region}}"
     - name: AWS_ACCOUNT_ID
       value: "{{match_resource.resource.account_id}}"
+    - name: AWS_ACCOUNT_NAME
+      value: "{{match_resource.account_name}}"
   secretsProvided:
     {% include "aws-auth.yaml" ignore missing %}
   alerts:

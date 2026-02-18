@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Check CloudWatch Log Groups without retention period
     [Tags]    aws    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -23,7 +23,7 @@ Check CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION
     ${no_retention_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_LOG_GROUPS_ALLOWED}) else 0
     Set Global Variable    ${no_retention_score}
 
-Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -65,8 +65,8 @@ Check if CloudTrail exists and is configured for multi-region in AWS Region `${A
         Set Global Variable    ${cloudtrail_score}
     END
 
-Check CloudTrail Without CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
-    [Documentation]    Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check CloudTrail Without CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+    [Documentation]    Check if CloudTrail exists and is configured for multi-region in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Tags]    aws    cloudtrail    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
     ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-monitoring-health ${CURDIR}/trail-without-cloudwatch-logs.yaml --cache-period 0
@@ -100,6 +100,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -125,6 +129,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-monitoring-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${MAX_LOG_GROUPS_ALLOWED}    ${MAX_LOG_GROUPS_ALLOWED}
     Set Suite Variable    ${MAX_CLOUDTRAIL_TRAILS_WITHOUT_CLOUDWATCH_LOGS_ALLOWED}    ${MAX_CLOUDTRAIL_TRAILS_WITHOUT_CLOUDWATCH_LOGS_ALLOWED}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}

@@ -8,8 +8,8 @@ metadata:
     {% include "common-annotations.yaml" %}
 spec:
   imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/s3.png
-  alias: AWS S3 Bucket Health For Region {{match_resource.resource.region}}
-  asMeasuredBy: The number of AWS S3 Buckets in region {{match_resource.resource.region}}
+  alias: AWS S3 Bucket Health For Region {{match_resource.resource.region}} in Account {{match_resource.account_name}}
+  asMeasuredBy: The number of AWS S3 Buckets in region {{match_resource.resource.region}} and account {{match_resource.account_name}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
