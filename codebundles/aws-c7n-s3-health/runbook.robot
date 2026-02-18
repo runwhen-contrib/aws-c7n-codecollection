@@ -60,14 +60,16 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
     ...    pattern=\w*
-    ${aws_account_name_query}=       RW.CLI.Run Cli    
-    ...    cmd=aws organizations describe-account --account-id $(aws sts get-caller-identity --query 'Account' --output text) --query "Account.Name" --output text | tr -d '\n'
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-s3-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
-    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${aws_account_name_query.stdout}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}

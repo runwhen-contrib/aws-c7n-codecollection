@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  List CloudWatch Log Groups Without Retention Period
     [Tags]    aws    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -51,7 +51,7 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
         RW.Core.Add Pre To Report    "No CloudWatch Log Groups without retention period found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`"
     END
 
-Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -115,7 +115,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
         END
     END
 
- Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+ Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]    Check for CloudTrail integration with CloudWatch Logs
     [Tags]    aws    cloudtrail    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -160,6 +160,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -167,6 +171,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-monitoring-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}
     # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
     # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).

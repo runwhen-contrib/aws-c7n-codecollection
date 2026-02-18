@@ -61,6 +61,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -80,6 +84,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ebs-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
     Set Suite Variable    ${SECURITY_EVENT_THRESHOLD}    ${SECURITY_EVENT_THRESHOLD}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}

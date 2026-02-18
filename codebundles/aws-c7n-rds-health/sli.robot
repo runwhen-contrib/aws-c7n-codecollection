@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unencrypted RDS instances
     [Tags]    aws    rds    database    encryption    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -23,7 +23,7 @@ Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account
     ${unencrypted_rds_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unencrypted_rds_score}
 
-Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find publicly accessible RDS instances
     [Tags]    aws    rds    database    security    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -34,7 +34,7 @@ Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS
     ${publicly_accessible_rds_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${publicly_accessible_rds_score}
 
-Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find RDS instances with backups disabled
     [Tags]    aws    rds    database    backups    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -62,6 +62,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -75,6 +79,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-rds-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${EVENT_THRESHOLD}    ${EVENT_THRESHOLD}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}
     # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);

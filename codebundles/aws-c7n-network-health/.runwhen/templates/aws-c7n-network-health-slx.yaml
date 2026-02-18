@@ -8,14 +8,14 @@ metadata:
     {% include "common-annotations.yaml" %}
 spec:
   imageURL: https://storage.googleapis.com/runwhen-nonprod-shared-images/icons/aws/Resource-Icons_06072024/Res_Networking-Content-Delivery/Res_Amazon-VPC_Virtual-private-cloud-VPC_48.svg
-  alias: AWS Network Health For AWS Account {{match_resource.resource.account_id}}
-  asMeasuredBy: The number of publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.resource.account_id}}
+  alias: AWS Network Health For AWS Account {{match_resource.account_name}}
+  asMeasuredBy: The number of publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in AWS account {{match_resource.account_name}}
   configProvided:
   - name: SLX_PLACEHOLDER
     value: SLX_PLACEHOLDER
   owners:
   - {{workspace.owner_email}}
-  statement: Identify publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in the AWS account {{match_resource.resource.account_id}}
+  statement: Identify publicly accessible security groups, unused EIPs, unused ELBs, and VPCs with flow logs disabled in the AWS account {{match_resource.account_name}}
   additionalContext:
     {% include "aws-hierarchy.yaml" ignore missing %}
     qualified_name: "{{ match_resource.qualified_name | replace(":", "_") }}"
