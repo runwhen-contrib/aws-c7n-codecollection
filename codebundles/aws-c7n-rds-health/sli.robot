@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unencrypted RDS instances
     [Tags]    aws    rds    database    encryption    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -23,7 +23,7 @@ Check for unencrypted RDS instances in AWS Region `${AWS_REGION}` in AWS account
     ${unencrypted_rds_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${unencrypted_rds_score}
 
-Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find publicly accessible RDS instances
     [Tags]    aws    rds    database    security    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -34,7 +34,7 @@ Check for publicly accessible RDS instances in AWS Region `${AWS_REGION}` in AWS
     ${publicly_accessible_rds_score}=    Evaluate    1 if int(${count.stdout}) <= int(${EVENT_THRESHOLD}) else 0
     Set Global Variable    ${publicly_accessible_rds_score}
 
-Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find RDS instances with backups disabled
     [Tags]    aws    rds    database    backups    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -46,7 +46,7 @@ Check for disabled backup RDS instances in AWS Region `${AWS_REGION}` in AWS acc
     Set Global Variable    ${backup_disabled_rds_score}
 
 
-Generate Health Score
+Improve: Generate Health Score
     ${health_score}=      Evaluate  (${unencrypted_rds_score} + ${publicly_accessible_rds_score} + ${backup_disabled_rds_score}) / 3
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}

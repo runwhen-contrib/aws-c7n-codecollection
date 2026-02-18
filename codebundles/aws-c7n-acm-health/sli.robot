@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unused ACM certificates
     [Tags]    aws    acm    certificate    security    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -23,7 +23,7 @@ Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `
     ${unused_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_UNUSED_CERTIFICATES}) else 0
     Set Global Variable    ${unused_certificate_score}
 
-Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find Expiring ACM certificates
     [Tags]    aws    acm    certificate    expiration    data:config
     CloudCustodian.Core.Generate Policy   
@@ -37,7 +37,7 @@ Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account
     ${expiring_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRING_CERTIFICATES}) else 0
     Set Global Variable    ${expiring_certificate_score}
 
-Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find expired ACM certificates
     [Tags]    aws    acm    certificate    expiration    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -48,7 +48,7 @@ Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account 
     ${expired_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRED_CERTIFICATES}) else 0
     Set Global Variable    ${expired_certificate_score}
 
-Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+Improve: Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find failed status ACM certificates
     [Tags]    aws    acm    certificate    status    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -59,7 +59,7 @@ Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
     ${failed_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_FAILED_CERTIFICATES}) else 0
     Set Global Variable    ${failed_certificate_score}
 
-Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+Improve: Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find pending validation ACM certificates
     [Tags]    aws    acm    certificate    validation    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -70,7 +70,7 @@ Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in A
     ${pending_validation_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_PENDING_VALIDATION_CERTIFICATES}) else 0
     Set Global Variable    ${pending_validation_score}
 
-Generate Health Score
+Improve: Generate Health Score
     ${health_score}=      Evaluate  (${unused_certificate_score} + ${expiring_certificate_score} + ${expired_certificate_score} + ${failed_certificate_score} + ${pending_validation_score}) / 5
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
