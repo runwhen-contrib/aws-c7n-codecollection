@@ -14,7 +14,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  Check for unattached EBS volumes in the specified region. 
     [Tags]    ebs    storage    aws    volume    unattached    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -51,7 +51,7 @@ List Unattached EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_
     END
 
 
-List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Check for Unencrypted EBS Volumes in the specified region. 
     [Tags]    ebs    storage    aws    volume    encryption    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -88,7 +88,7 @@ List Unencrypted EBS Volumes in AWS Region `${AWS_REGION}` in AWS account `${AWS
     END
 
 
-List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+List Unused EBS Snapshots in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Check for Unused EBS Snapshots in the specified region. 
     [Tags]    ebs    storage    aws    volume    unused    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -134,6 +134,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -141,6 +145,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-ebs-health         # Note: Clean out the cloud custoding report dir to ensure accurate data
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}
     # AWS credentials are provided by the platform from the aws-auth block (runwhen-local);
     # the runtime uses aws_utils to set up the auth environment (IRSA, access key, assume role, etc.).

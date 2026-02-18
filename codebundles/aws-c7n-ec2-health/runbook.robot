@@ -13,7 +13,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  List stale EC2 instances in AWS Region. 
     [Tags]    ec2    instance    aws    compute    stale    data:config
 
@@ -65,7 +65,7 @@ List stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS
         RW.Core.Add Pre To Report     ${ec2_instances_list_length} stale instances found, below threshold of ${MAX_ALLOWED_STALE_INSTANCES}\n${report_data.stdout}
     END
 
-List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}` 
+List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  List stopped EC2 instances in AWS Region. 
     [Tags]    ec2    instance    aws    compute    data:config
     
@@ -118,7 +118,7 @@ List stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${A
         RW.Core.Add Pre To Report    ${ec2_instances_list_length} stopped instances found, below threshold of ${MAX_ALLOWED_STOPPED_INSTANCES}\n${report_data.stdout}
     END
 
-List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account ${AWS_ACCOUNT_ID}
+List invalid AWS Auto Scaling Groups in AWS Region ${AWS_REGION} in AWS account ${AWS_ACCOUNT_NAME}
     [Documentation]  List invalid Auto Scaling Groups
     [Tags]    asg    aws    compute    asg    data:config
 
@@ -197,6 +197,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -236,6 +240,7 @@ Suite Initialization
     Set Suite Variable    ${AWS_EC2_TAGS}    ${AWS_EC2_TAGS}
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${MAX_ALLOWED_STOPPED_INSTANCES}    ${MAX_ALLOWED_STOPPED_INSTANCES}
     Set Suite Variable    ${MAX_ALLOWED_STALE_INSTANCES}    ${MAX_ALLOWED_STALE_INSTANCES}
     Set Suite Variable    ${MAX_ALLOWED_INVALID_ASG}    ${MAX_ALLOWED_INVALID_ASG}

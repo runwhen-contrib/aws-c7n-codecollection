@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unused ACM certificates
     [Tags]    aws    acm    certificate    security    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -23,7 +23,7 @@ Check for unused ACM certificates in AWS Region `${AWS_REGION}` in AWS account `
     ${unused_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_UNUSED_CERTIFICATES}) else 0
     Set Global Variable    ${unused_certificate_score}
 
-Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find Expiring ACM certificates
     [Tags]    aws    acm    certificate    expiration    data:config
     CloudCustodian.Core.Generate Policy   
@@ -37,7 +37,7 @@ Check for Expiring ACM certificates in AWS Region `${AWS_REGION}` in AWS account
     ${expiring_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRING_CERTIFICATES}) else 0
     Set Global Variable    ${expiring_certificate_score}
 
-Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_ID}`
+Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find expired ACM certificates
     [Tags]    aws    acm    certificate    expiration    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -48,7 +48,7 @@ Check for expired ACM certificates in AWS Region `${AWS_REGION}` in AWS account 
     ${expired_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_EXPIRED_CERTIFICATES}) else 0
     Set Global Variable    ${expired_certificate_score}
 
-Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find failed status ACM certificates
     [Tags]    aws    acm    certificate    status    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -59,7 +59,7 @@ Check for Failed Status ACM Certificates in AWS Region `${AWS_REGION}` in AWS Ac
     ${failed_certificate_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_FAILED_CERTIFICATES}) else 0
     Set Global Variable    ${failed_certificate_score}
 
-Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`
+Check for Pending Validation ACM Certificates in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find pending validation ACM certificates
     [Tags]    aws    acm    certificate    validation    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -84,6 +84,10 @@ Suite Initialization
     ${AWS_ACCOUNT_ID}=    RW.Core.Import User Variable   AWS_ACCOUNT_ID
     ...    type=string
     ...    description=AWS Account ID
+    ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
     ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
@@ -128,6 +132,7 @@ Suite Initialization
     ${clean_workding_dir}=    RW.CLI.Run Cli    cmd=rm -rf ${OUTPUT_DIR}/aws-c7n-acm-health
     Set Suite Variable    ${AWS_REGION}    ${AWS_REGION}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${CERT_EXPIRY_DAYS}    ${CERT_EXPIRY_DAYS}
     Set Suite Variable    ${MAX_UNUSED_CERTIFICATES}    ${MAX_UNUSED_CERTIFICATES}
     Set Suite Variable    ${MAX_FAILED_CERTIFICATES}    ${MAX_FAILED_CERTIFICATES}

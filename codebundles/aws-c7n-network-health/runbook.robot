@@ -13,7 +13,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_ID}` 
+List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  Find publicly accessible security groups (e.g., "0.0.0.0/0" or "::/0")
     [Tags]    tag    aws    security-group    network    data:config
     CloudCustodian.Core.Generate Policy   
@@ -54,7 +54,7 @@ List Publicly Accessible Security Groups in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
+List unused Elastic IPs in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unused Elastic IPs that are not associated with any instance or network interface
     [Tags]    aws    eip    network    data:config
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
@@ -94,7 +94,7 @@ List unused Elastic IPs in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
+List unused ELBs in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find unused Application Load Balancers (ALBs) and Network Load Balancers (NLBs) that do not have any associated targets
     [Tags]    aws    elb    network    data:config
     FOR    ${region}    IN    @{AWS_ENABLED_REGIONS}
@@ -134,7 +134,7 @@ List unused ELBs in AWS account `${AWS_ACCOUNT_ID}`
         END
     END
 
-List VPCs with Flow Logs Disabled in AWS account `${AWS_ACCOUNT_ID}`
+List VPCs with Flow Logs Disabled in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Find VPCs that do not have flow logs enabled
     [Tags]    aws    vpc    network    data:config
     CloudCustodian.Core.Generate Policy   
@@ -185,6 +185,10 @@ Suite Initialization
     ...    type=string
     ...    description=AWS Account ID
     ...    pattern=\w*
+    ${AWS_ACCOUNT_NAME}=    RW.Core.Import User Variable   AWS_ACCOUNT_NAME
+    ...    type=string
+    ...    description=AWS Account Name
+    ...    pattern=\w*
     ${aws_credentials}=    RW.Core.Import Secret    aws_credentials
     ...    type=string
     ...    description=AWS credentials from the workspace (from aws-auth block; e.g. aws:access_key@cli, aws:irsa@cli).
@@ -216,4 +220,5 @@ Suite Initialization
     Set Suite Variable    ${AWS_SECURITY_GROUP_TAGS}    ${AWS_SECURITY_GROUP_TAGS}
     Set Suite Variable    ${AWS_VPC_TAGS}    ${AWS_VPC_TAGS}
     Set Suite Variable    ${AWS_ACCOUNT_ID}    ${AWS_ACCOUNT_ID}
+    Set Suite Variable    ${AWS_ACCOUNT_NAME}    ${AWS_ACCOUNT_NAME}
     Set Suite Variable    ${aws_credentials}    ${aws_credentials}
