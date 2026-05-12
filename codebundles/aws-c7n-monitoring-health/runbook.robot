@@ -12,7 +12,7 @@ Library    CloudCustodian.Core
 Suite Setup    Suite Initialization
 
 *** Tasks ***
-List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+Improve: List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]  List CloudWatch Log Groups Without Retention Period
     [Tags]    aws    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -51,7 +51,7 @@ List CloudWatch Log Groups Without Retention Period in AWS Region `${AWS_REGION}
         RW.Core.Add Pre To Report    "No CloudWatch Log Groups without retention period found in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_ID}`"
     END
 
-Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+Improve: Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]    Check if CloudTrail exists and is configured for multi-region
     [Tags]    aws    cloudtrail    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -115,7 +115,7 @@ Check CloudTrail Configuration in AWS Region `${AWS_REGION}` in AWS Account `${A
         END
     END
 
- Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
+ Improve: Check for CloudTrail integration with CloudWatch Logs in AWS Region `${AWS_REGION}` in AWS Account `${AWS_ACCOUNT_NAME}`
     [Documentation]    Check for CloudTrail integration with CloudWatch Logs
     [Tags]    aws    cloudtrail    cloudwatch    logs    data:config
     ${c7n_output}=    RW.CLI.Run Cli
