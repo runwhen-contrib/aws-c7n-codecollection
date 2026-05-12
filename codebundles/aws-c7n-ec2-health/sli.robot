@@ -13,7 +13,7 @@ Suite Setup    Suite Initialization
 
 
 *** Tasks ***
-Check for stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
+Improve: Check for stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  Check for stale EC2 instances in AWS Region. 
     [Tags]    ec2    instance    aws    compute    data:config
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -28,7 +28,7 @@ Check for stale AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `
     ${stale_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_ALLOWED_STALE_INSTANCES}) else 0
     Set Global Variable    ${stale_ec2_instances_score}
 
-Check for stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
+Improve: Check for stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}` 
     [Documentation]  Check for stopped EC2 instances in AWS Region. 
     [Tags]    ec2    instance    aws    compute    data:config
     ${result}=    CloudCustodian.Core.Generate Policy   
@@ -43,7 +43,7 @@ Check for stopped AWS EC2 instances in AWS Region `${AWS_REGION}` in AWS account
     ${stopped_ec2_instances_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_ALLOWED_STOPPED_INSTANCES}) else 0
     Set Global Variable    ${stopped_ec2_instances_score}
 
-Check for invalid AWS Auto Scaling Groups in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
+Improve: Check for invalid AWS Auto Scaling Groups in AWS Region `${AWS_REGION}` in AWS account `${AWS_ACCOUNT_NAME}`
     [Documentation]  Check for invalid Auto Scaling Groups.
     [Tags]    asg    aws    compute    data:config
     ${c7n_output}=    RW.CLI.Run Cli
@@ -54,7 +54,7 @@ Check for invalid AWS Auto Scaling Groups in AWS Region `${AWS_REGION}` in AWS a
     ${invalid_asg_score}=    Evaluate    1 if int(${count.stdout}) <= int(${MAX_ALLOWED_INVALID_ASG}) else 0
     Set Global Variable    ${invalid_asg_score}
 
-Generate Health Score
+Improve: Generate Health Score
     ${health_score}=      Evaluate  (${stale_ec2_instances_score} + ${stopped_ec2_instances_score} + ${invalid_asg_score}) / 3
     ${health_score}=      Convert to Number    ${health_score}  2
     RW.Core.Push Metric    ${health_score}
