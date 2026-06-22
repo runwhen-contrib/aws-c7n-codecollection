@@ -19,7 +19,24 @@ Count S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
     ...    env=${env}
     ${count}=     RW.CLI.Run Cli
     ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-s3-health/s3-public-buckets/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
-    RW.Core.Push Metric    ${count.stdout}
+    ${public_bucket_count}=    Evaluate    int(${count.stdout})
+    Set Global Variable    ${public_bucket_count}
+
+Count S3 Buckets Without Default Encryption in AWS Account `${AWS_ACCOUNT_NAME}`
+    [Documentation]  Fetch total number of S3 buckets without default encryption enabled.
+    [Tags]    s3    storage    aws    security    encryption    data:config
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-s3-health ${CURDIR}/s3-unencrypted-buckets.yaml
+    ...    env=${env}
+    ${count}=     RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-s3-health/s3-unencrypted-buckets/metadata.json | jq '.metrics[] | select(.MetricName == "ResourceCount") | .Value'
+    ${unencrypted_bucket_count}=    Evaluate    int(${count.stdout})
+    Set Global Variable    ${unencrypted_bucket_count}
+
+Generate S3 Health Metric
+    [Documentation]  Combine insecure bucket findings into a single metric.
+    ${s3_unhealthy_bucket_count}=    Evaluate    int(${public_bucket_count}) + int(${unencrypted_bucket_count})
+    RW.Core.Push Metric    ${s3_unhealthy_bucket_count}
 
 
 
