@@ -23,7 +23,7 @@ List S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
     RW.Core.Add Pre To Report    ${c7n_output.stdout}     # Note: This actual data needs to be parsed to be usable in the report. Json data in a report like this isn't super useful. 
 
     ${parsed_results}=    CloudCustodian.Core.Parse Custodian Results         # Note: This just an example of simple parsing with a custom keyword.
-    ...    input_dir=${OUTPUT_DIR}/aws-c7n-s3-health
+    ...    input_dir=${OUTPUT_DIR}/aws-c7n-s3-health/s3-public-buckets
     RW.Core.Add Pre To Report    ${parsed_results}  
 
     # Convert custodian json output to a list. 
@@ -46,6 +46,39 @@ List S3 Buckets With Public Access in AWS Account `${AWS_ACCOUNT_NAME}`
             ...    details=${item}        # Note: This should have some refined and specific details.
             ...    next_steps=Disable public access to AWS S3 bucket `${item["Name"]}`.   
         END    
+    END
+
+List S3 Buckets Without Default Encryption in AWS Account `${AWS_ACCOUNT_NAME}`
+    [Documentation]  Fetch total number of S3 buckets without default encryption and raise an issue for each bucket.
+    [Tags]    s3    storage    aws    security    encryption    data:config
+    ${c7n_output}=    RW.CLI.Run Cli
+    ...    cmd=custodian run -r ${AWS_REGION} --output-dir ${OUTPUT_DIR}/aws-c7n-s3-health ${CURDIR}/s3-unencrypted-buckets.yaml
+    ...    env=${env}
+    ${report_data}=    RW.CLI.Run Cli
+    ...    cmd=cat ${OUTPUT_DIR}/aws-c7n-s3-health/s3-unencrypted-buckets/resources.json
+
+    ${parsed_results}=    CloudCustodian.Core.Parse Custodian Results
+    ...    input_dir=${OUTPUT_DIR}/aws-c7n-s3-health/s3-unencrypted-buckets
+    RW.Core.Add Pre To Report    ${parsed_results}
+
+    TRY
+        ${bucket_list}=    Evaluate    json.loads(r'''${report_data.stdout}''')    json
+    EXCEPT
+        Log    Failed to load JSON payload, defaulting to empty list.    WARN
+        ${bucket_list}=    Create List
+    END
+
+    IF    len(@{bucket_list}) > 0
+        FOR    ${item}    IN    @{bucket_list}
+            RW.Core.Add Issue
+            ...    severity=2
+            ...    expected=AWS S3 Buckets in AWS Account `${AWS_ACCOUNT_NAME}` should have default encryption enabled
+            ...    actual=AWS S3 Bucket `${item["Name"]}` in AWS Account `${AWS_ACCOUNT_NAME}` does not have default encryption enabled
+            ...    title=AWS S3 Bucket `${item["Name"]}` in AWS Account `${AWS_ACCOUNT_NAME}` is missing default encryption
+            ...    reproduce_hint=${c7n_output.cmd}
+            ...    details=${item}
+            ...    next_steps=Enable default encryption on AWS S3 bucket `${item["Name"]}`.
+        END
     END
 
 

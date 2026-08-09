@@ -1,36 +1,90 @@
 <p align="center">
   <a href="https://runwhen.slack.com/join/shared_invite/zt-1l7t3tdzl-IzB8gXDsWtHkT8C5nufm2A">
-    <img src="https://img.shields.io/badge/Join%20Slack-%23E01563.svg?&style=for-the-badge&logo=slack&logoColor=white" alt="Join Slack">
+    <img src="https://img.shields.io/badge/Join%20Slack-%23E01563.svg?&style=for-the-badge&logo=slack&logoColor=white" alt="Join Slack" />
   </a>
 </p>
-<a href='https://codespaces.new/runwhen-contrib/codecollection-template?quickstart=1'><img src='https://github.com/codespaces/badge.svg' alt='Open in GitHub Codespaces' style='max-width: 100%;'></a>
 
+# aws-c7ncodecollection
 
-# codecollection-template
-A hello-world-style template for codecollection authors to get started writing codebundles. This template contains the minimum file structure expected by the RunWhen platform.
+AWS health and governance CodeCollection for RunWhen, powered by Cloud Custodian (c7n) and Robot Framework.
 
-[![Build](https://github.com/runwhen-contrib/codecollection-template/actions/workflows/build.yaml/badge.svg)](https://github.com/runwhen-contrib/codecollection-template/actions/workflows/build.yaml)
+Each codebundle in this repository does two things:
 
-## Getting Started
-Looking to be a contributor for CodeCollections or start your own? We'd love to collaborate! Head on over to our [public docs](https://docs.runwhen.com/public/v/runwhen-authors/codecollection-development/getting-started/running-your-first-codebundle) to get started.
+- Produces an SLI score/metric for a class of AWS risks.
+- Produces runbook output with issue-level triage details.
 
-File Structure overview of devcontainer:
+## What Is Included
+
+The repository currently includes the following codebundles under `codebundles/`:
+
+- `aws-c7n-acm-health`: expired, pending validation, failed, soon-to-expire, and unused certificates.
+- `aws-c7n-ebs-health`: unattached volumes, unencrypted volumes, and unused snapshots.
+- `aws-c7n-ec2-health`: stale instances, long-stopped instances, and invalid Auto Scaling Groups.
+- `aws-c7n-monitoring-health`: CloudTrail and CloudWatch logging hygiene checks.
+- `aws-c7n-network-health`: insecure security-group ingress, unused EIP/ELB, missing VPC flow logs.
+- `aws-c7n-rds-health`: backup-disabled, public, and unencrypted RDS instances.
+- `aws-c7n-s3-health`: public S3 bucket exposure checks.
+
+## Repository Layout
+
+- `codebundles/`: runnable checks, runbooks, and RunWhen metadata templates.
+- `libraries/CloudCustodian/Core/`: shared Python helper keywords used by Robot suites.
+- `.github/workflows/score.yaml`: automated scoring/suggestion workflow for codebundles.
+- `.github/workflows/release.yaml`: scheduled/manual release workflow.
+
+## How A Bundle Works
+
+Inside each bundle, you will usually see:
+
+- One or more Cloud Custodian policies (`*.yaml`) and/or templates (`*.j2`).
+- `sli.robot`: computes and pushes a metric.
+- `runbook.robot`: parses findings and raises actionable issues.
+- `.runwhen/generation-rules/` and `.runwhen/templates/`: SLX/SLI/Runbook generation for the RunWhen platform.
+- `.test/`: optional Terraform and Taskfile-based end-to-end test harness.
+
+## Quickstart (Contributor)
+
+### 1) Clone and open the repository
+
+```bash
+git clone https://github.com/Saurabhtbj1201/aws-c7ncodecollection.git
+cd aws-c7ncodecollection
 ```
--/app/
-    |- auth/ #store secrets here, it should already be properly gitignored for you
-    |- codecollection/
-    |   |- codebundles/ # stores codebundles that can be run
-    |   |- libraries/ # stores python keyword libraries used by codebundles
-    |- dev_facade/ # provides interfaces equivalent to those used on the platform, but just dry runs the keywords to assist with development
-    ...
+
+### 2) Choose your environment
+
+- Recommended: use the dev container configuration in `.devcontainer.json`.
+- Alternative: set up a local Python environment and install dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-The included script `ro` wraps the `robot` RobotFramework binary, and includes some extra functionality to write logs to a consistent location for viewing in a HTTP server at http://localhost:3000/ that is always running as part of the devcontainer.
+### 3) Provide AWS credentials for read-only checks
 
-### Quickstart
+Most bundles require at least:
 
-Navigate to the codebundle directory
-`cd codecollection/codebundles/hello_world/`
+```bash
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_DEFAULT_REGION="us-west-2"
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+```
 
-Run the codebundle
-`ro sli.robot`
+### 4) Start with one existing check
+
+The easiest first path is to add a new policy/check to an existing bundle (commonly `aws-c7n-s3-health` or `aws-c7n-ec2-health`) before creating a brand-new bundle.
+
+## Contributing
+
+See `CONTRIBUTING.md` for a step-by-step guide, checklist, and PR workflow.
+
+## Notes For Windows Contributors
+
+The `.test/Taskfile.yaml` flows use shell utilities (`source`, `awk`, `jq`, `column`) and are easiest to run in a Linux devcontainer or WSL shell.
+
+## Related Documentation
+
+- RunWhen author docs: https://docs.runwhen.com/public/v/runwhen-authors/codecollection-development/getting-started/running-your-first-codebundle

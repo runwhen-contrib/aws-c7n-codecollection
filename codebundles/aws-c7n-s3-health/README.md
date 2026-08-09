@@ -5,8 +5,12 @@ This codebundle starts out as an example of integrating the custodian (c7n) cli 
 ## SLI
 A simple SLI that counts S3 buckets that are public. Uses the custodian cli. 
 
+This bundle now evaluates:
+- S3 buckets with public access enabled
+- S3 buckets missing default encryption
+
 ## TaskSet
-Similar to the SLI, but produces a report on the specific resources and raises issues for each public bucket. 
+Similar to the SLI, but produces a report on the specific resources and raises issues for each bucket that is public or unencrypted. 
 
 
 ## Required Configuration

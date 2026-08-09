@@ -1,0 +1,6 @@
+policies:
+  - name: s3-unencrypted-buckets
+    resource: aws.s3
+    filters:
+      - type: bucket-encryption
+        state: false
